@@ -16,15 +16,16 @@ pub fn main() {
         let mut cwd_pth = env::current_dir().unwrap();
         cwd_pth.push("config.yaml");
         let mut paths = vec![
-            dirs.config_dir(),
-            &cwd_pth,
+            dirs.config_dir().to_owned(),
+            cwd_pth,
         ];
-        println!("{:?}", format!("{}_CONFIG_DIR", CRATE_NAME));
-//        if let Some(pth) = option_env!(format!("{}_CONFIG_DIR", CRATE_NAME)) {
-//            if exists(pth) {
-//                paths.push(pth);
-//            }
-//        }
+        //TODO: Would be nice if this path included CRATE_NAME (to_upper), but only literals can be used
+        if let Some(pth) = option_env!("CONFIG_PATH") {
+            let pth = PathBuf::from(pth);
+            if pth.exists() {
+                paths.push(pth);
+            }
+        }
         Config::including_optional_config_files(&paths).unwrap_or_exit()
         // TODO: does not include the REPO_ROOT/config dir (but then, that shouldn't be checked in)
     };
