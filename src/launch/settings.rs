@@ -59,7 +59,7 @@ impl Settings {
             });
 
         // Add in the current environment file ('development' by default)
-        let mode = env::var("RUN_MODE").unwrap_or("development".into());
+        let mode = env::var("RUN_MODE").unwrap_or_else(|_| "development".into());
         let mode_file_name = format!("config/{}.yaml", mode);
         conf.merge(File::with_name(&mode_file_name).required(false))
             .unwrap_or_else(|err| {

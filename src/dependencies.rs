@@ -18,6 +18,7 @@ mod rand_demo {
     }
 
     #[test]
+    #[allow(clippy::float_cmp)]
     fn repeatable() {
         const MY_SEED: [u8; 32] = [
             123, 164, 185, 95, 103, 243, 38, 140, 133, 27, 36, 178, 255, 156, 87, 155, 130, 52, 56,
@@ -81,12 +82,12 @@ mod chrono_demo {
     fn utc() {
         let now = Utc::now();
         assert!(now.year() > 2018);
-        let _ = Utc.ymd(2014, 7, 8).and_hms(11, 30, 01);
+        let _ = Utc.ymd(2014, 7, 8).and_hms(11, 30, 1);
     }
 
     #[test]
     fn local() {
-        let naive = NaiveDate::from_ymd(2014, 7, 8).and_hms(11, 30, 01);
+        let naive = NaiveDate::from_ymd(2014, 7, 8).and_hms(11, 30, 1);
         let ams = Amsterdam.from_local_datetime(&naive).unwrap();
         let txt = ams.to_string();
         assert_eq!("2014-07-08 11:30:01 CEST", txt)
@@ -179,7 +180,7 @@ mod itertools_demo {
     fn cartesian_product() {
         let suit = vec!["♤", "♥", "♢", "♣"].into_iter();
         let rank = 2..15;
-        let deck = HashSet::<(&str, u8)>::from_iter(suit.cartesian_product(rank).into_iter());
+        let deck = HashSet::<(&str, u8)>::from_iter(suit.cartesian_product(rank));
         assert_eq!(52, deck.len());
         assert!(deck.contains(&("♥", 2)));
     }
@@ -254,7 +255,7 @@ mod array_compression_demo {
         {
             let params = enc::BrotliEncoderParams::default();
             let mut writer = CompressorWriter::with_params(&mut stream, 4096, &params);
-            writer.write(&text.as_bytes()).unwrap();
+            writer.write_all(&text.as_bytes()).unwrap();
             writer.flush().unwrap();
         }
 
@@ -262,7 +263,8 @@ mod array_compression_demo {
             let mut reader = Decompressor::new(&mut stream, 4096);
             //            let mut res = String::new();
             let mut res = [0u8; 4096];
-            reader.read(&mut res).unwrap();
+            //TODO @mark: should this really be '_exact'? (clippy)
+            reader.read_exact(&mut res).unwrap();
             println!("{:?}", res[0]);
             println!("{:?}", res[1]);
             println!("{:?}", res[2]);
