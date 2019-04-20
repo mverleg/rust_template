@@ -95,16 +95,7 @@ mod chrono_demo {
 
 #[cfg(test)]
 mod itertools_demo {
-    use itertools::Itertools;
-
-    #[test]
-    fn any() {
-        let mut an = (0..18)
-            .filter(|it| it % 5 == 0)
-            .filter(|it| it % 3 == 0)
-            .any();
-        assert!(an);
-    }
+    use itertools::{Itertools};
 
     #[test]
     fn interleave() {
@@ -146,10 +137,11 @@ mod itertools_demo {
 
     #[test]
     fn chunks() {
-        let mut cnk: u8 = (0..8).chunks(3);
-//        assert_eq!((0, 1, 2), cnk.);
-//        assert_eq!((3, 4, 5), cnk.next().unwrap());
-//        assert_eq!(None, cnk.next());
+        let dat = vec![0u8, 1, 2, 3, 4, 5, 6, 7];
+        let mut cnk = dat.chunks(3);
+        assert_eq!([0, 1, 2], cnk.next().unwrap());
+        assert_eq!([3, 4, 5], cnk.next().unwrap());
+        assert_eq!([6, 7], cnk.next().unwrap());
     }
 }
 
