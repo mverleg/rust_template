@@ -95,9 +95,10 @@ mod chrono_demo {
 
 #[cfg(test)]
 mod itertools_demo {
-    use itertools::{Itertools};
     use std::collections::HashSet;
     use std::iter::FromIterator;
+
+    use itertools::Itertools;
 
     #[test]
     fn interleave() {
@@ -196,7 +197,20 @@ mod itertools_demo {
 
 #[cfg(test)]
 mod generic_array_demo {
+    use std::mem::size_of;
+    use generic_array::{arr, GenericArray};
+    use generic_array::typenum::U4;
+
     #[test]
-    fn to_do() {}
+    fn macro_create() {
+        let array = arr![u32; 1, 2, 3];
+        assert_eq!(3, array.len());
+        assert_eq!(array[2], 3);
+    }
+
+    #[test]
+    fn no_overhead() {
+        assert!(size_of::<GenericArray<u32, U4>>() == 16)
+    }
 }
 
