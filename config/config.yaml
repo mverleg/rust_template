@@ -1,5 +1,0 @@
-
-# This YAML can contain configuration options.
-# These values can also be provided as environment options.
-
-log_level: "trace"
