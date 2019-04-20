@@ -238,3 +238,9 @@ mod array_tool_demo {
         assert_eq!("asd asdf\nasd", "asd asdf asd".word_wrap(8));
     }
 }
+
+#[cfg(test)]
+mod array_compression_demo {
+    #[test]
+    fn smaller() {}
+}

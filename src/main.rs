@@ -3,6 +3,7 @@ mod launch;
 mod dependencies;
 
 use launch::settings::Settings;
+use launch::setup;
 
 pub fn main() {
     // Read configuration from files and environment.
@@ -10,5 +11,6 @@ pub fn main() {
     //TODO @mark: log:
 //    info!("{:?}", settings);
     println!("{:?}", settings);
+    setup(&settings);
 
 }
