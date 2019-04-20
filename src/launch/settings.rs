@@ -5,8 +5,10 @@ use config::{Config, Environment, File};
 use serde::Deserialize;
 
 use super::CRATE_NAME;
+use directories::ProjectDirs;
 
 //TODO @mark: .env file
+//TODO @mark: CLI clap
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -19,17 +21,14 @@ impl Settings {
     pub fn new() -> Self {
         let mut conf = Config::new();
 
-        // TODO @mark: Files are read in this order:
-        // TODO * user profile (e.g. inside ~/.config/)
-        // * base settings (config.yaml)
-        // * [mode].yaml (from RUN_MODE, i.e. development.yaml)
-        // * local.yaml (do not check this into VCS)
-        // * environment
-
-        //TODO @mark: parse unwrap_or_else messages
-
         // Start with the "default" configuration file.
         conf.merge(File::with_name("src/launch/config.defaults.yaml"))
+            .unwrap_or_else(|err| panic!("Failed to parse default configuration: {:?}", err));
+
+        // Read from user configuration dir.
+        let conf_path: String = ProjectDirs::from("", CRATE_NAME, CRATE_NAME).unwrap()
+            .config_dir().to_string_lossy().into_owned();
+        conf.merge(File::with_name(&conf_path).required(false))
             .unwrap_or_else(|err| panic!("Failed to parse default configuration: {:?}", err));
 
         // Add the base user config file.
