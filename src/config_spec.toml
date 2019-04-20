@@ -1,0 +1,11 @@
+
+# This specifies the format for config/*.yaml files and environment variables.
+# TODO: hopefully in some future version, this also works for CLI options
+
+[[param]]
+name = "log_level"
+type = "string"
+optional = true
+default = "\"debug\""
+doc = "Log level of the application: error, warn, info, debug or trace."
+
