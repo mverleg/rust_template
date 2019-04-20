@@ -1,16 +1,15 @@
 
 // Some tests of dependencies, more as a demo than to serve as verification.
 #[cfg(test)]
-mod tests {
+mod rand_tests {
     use rand::prelude::StdRng;
     use rand::Rng;
     use rand::thread_rng;
     use rand::SeedableRng;
-    use lazy_static::lazy_static;
 
     // https://rust-random.github.io/book/overview.html
     #[test]
-    fn rand_autoseed() {
+    fn autoseed() {
         let mut rng = thread_rng();
         let uni: f64 = rng.gen();
         assert!(uni >= 0.0);
@@ -18,25 +17,56 @@ mod tests {
     }
 
     #[test]
-    fn rand_repeatable() {
+    fn repeatable() {
         const MY_SEED: [u8; 32] = [
-            123, 164, 185,  95, 103, 243,  38, 140,
-            133,  27,  36, 178, 255, 156,  87, 155,
-            130,  52,  56, 167, 183,  98,    6, 242,
-            214,  42,  82, 202, 230, 246,  83, 234];
+            123, 164, 185, 95, 103, 243, 38, 140,
+            133, 27, 36, 178, 255, 156, 87, 155,
+            130, 52, 56, 167, 183, 98, 6, 242,
+            214, 42, 82, 202, 230, 246, 83, 234];
         fn random_from_seed() -> f64 {
             let mut rng = StdRng::from_seed(MY_SEED);
             rng.gen::<f64>()
         }
         assert_eq!(random_from_seed(), random_from_seed());
     }
+}
+
+#[cfg(test)]
+mod lazy_static_tests {
+    use lazy_static::lazy_static;
 
     lazy_static! {
         static ref MY_VEC: Vec<&'static str> = vec!["hello", "world"];
     }
 
     #[test]
-    fn lazy_static_vec() {
+    fn str_vector() {
         assert_eq!("hello", MY_VEC[0]);
+    }
+}
+
+#[cfg(test)]
+mod regex_tests {
+    use regex::Regex;
+    use lazy_static::lazy_static;
+
+    lazy_static! {
+        static ref DATE_RE: Regex = Regex::new(
+            r"^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})$"
+        ).unwrap();
+    }
+
+    #[test]
+    fn ymd_date_is_match() {
+        assert!(DATE_RE.is_match("2019-04-27"));
+        assert!(!DATE_RE.is_match("2019-04-27 "));
+    }
+
+    #[test]
+    fn ymd_date_capture() {
+        let caps = DATE_RE.captures("2019-04-27").unwrap();
+        assert_eq!("2019", &caps["year"]);
+        assert_eq!("04", &caps["month"]);
+        assert_eq!("27", &caps["day"]);
     }
 }
