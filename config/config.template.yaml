@@ -1,5 +1,9 @@
 
 # This YAML can contain configuration options.
 # These values can also be provided as environment options.
+# Files are read in this order:
+# * user profile (e.g. inside ~/.config/)
+# * base settings (config.yaml)
+# * [mode].yaml (from RUN_MODE, i.e. development)
 
 log_level: "trace"

@@ -1,16 +1,19 @@
 use std::env;
 use std::path::PathBuf;
 
-use configure_me::include_config;
-use directories::ProjectDirs;
-
+mod launch;
 mod dependencies;
 
+use launch::settings::Settings;
+
 const CRATE_NAME: &'static str = env!("CARGO_PKG_NAME");
-include_config!();
 
 pub fn main() {
     // Read configuration from files and environment.
+    let settings = launch::settings::Settings::new();
+    //TODO @mark: log:
+//    info!("{:?}", settings);
+
     let (server_config, _remaining_args) = {
         let dirs = ProjectDirs::from("", CRATE_NAME, CRATE_NAME).unwrap();
         let mut cwd_pth = env::current_dir().unwrap();
