@@ -1,7 +1,7 @@
-use configure_me;
+use configure_me_codegen::build_script_with_man;
 
 fn main() {
     // configure_me
-    configure_me::build_script_with_man("config_spec.toml").unwrap();
+    build_script_with_man("build/config_spec.toml").unwrap();
 
 }
