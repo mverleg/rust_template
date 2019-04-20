@@ -15,8 +15,7 @@ use super::CRATE_NAME;
 pub struct Settings {
     pub run_mode: String,
     pub log_level: u8,
-    pub friendly_panics: bool
-    //TODO @mark: replace by log level ^
+    pub friendly_panics: bool, //TODO @mark: replace by log level ^
 }
 
 pub fn config_error(msg: String) -> ! {
@@ -35,41 +34,69 @@ impl Settings {
 
         // Start with the "default" configuration file.
         conf.merge(File::with_name("src/launch/config.defaults.yaml"))
-            .unwrap_or_else(|err| config_error(format!("Failed to read default configuration: {:?}", err)));
+            .unwrap_or_else(|err| {
+                config_error(format!("Failed to read default configuration: {:?}", err))
+            });
 
         // Read from user configuration dir.
-        let conf_path: String = ProjectDirs::from("", CRATE_NAME, CRATE_NAME).unwrap()
-            .config_dir().to_string_lossy().into_owned();
+        let conf_path: String = ProjectDirs::from("", CRATE_NAME, CRATE_NAME)
+            .unwrap()
+            .config_dir()
+            .to_string_lossy()
+            .into_owned();
         conf.merge(File::with_name(&conf_path).required(false))
-            .unwrap_or_else(|err| config_error(format!("Failed to read user configuration as {}: {:?}", conf_path, err)));
+            .unwrap_or_else(|err| {
+                config_error(format!(
+                    "Failed to read user configuration as {}: {:?}",
+                    conf_path, err
+                ))
+            });
 
         // Add the base user config file.
         conf.merge(File::with_name("config/config.yaml").required(false))
-            .unwrap_or_else(|err| config_error(format!("Failed to read config.yaml (base file): {:?}", err)));
+            .unwrap_or_else(|err| {
+                config_error(format!("Failed to read config.yaml (base file): {:?}", err))
+            });
 
         // Add in the current environment file ('development' by default)
         let mode = env::var("RUN_MODE").unwrap_or("development".into());
         let mode_file_name = format!("config/{}.yaml", mode);
         conf.merge(File::with_name(&mode_file_name).required(false))
-            .unwrap_or_else(|err| config_error(format!("Failed to read {} (based on RUN_MODE): {:?}", mode_file_name, err)));
+            .unwrap_or_else(|err| {
+                config_error(format!(
+                    "Failed to read {} (based on RUN_MODE): {:?}",
+                    mode_file_name, err
+                ))
+            });
 
         // Add in a local configuration file
         conf.merge(File::with_name("config/local.yaml").required(false))
-            .unwrap_or_else(|err| config_error(format!("Failed to read local.yaml (override file): {:?}", err)));
+            .unwrap_or_else(|err| {
+                config_error(format!(
+                    "Failed to read local.yaml (override file): {:?}",
+                    err
+                ))
+            });
 
         // Read .env file into environment
         match dotenv() {
             Ok(_) => (),
             Err(err) => match err {
-                Error::Io(_) => () /* perhaps the .env file did not exist, which is okay */,
-                Error::LineParse(msg) => config_error(format!("Failed to parse a line in .env file: {:?}", msg)),
-                Error::EnvVar(msg) => config_error(format!("Failed to load var from .env file: {:?}", msg)),
-            }
+                Error::Io(_) => (), /* perhaps the .env file did not exist, which is okay */
+                Error::LineParse(msg) => {
+                    config_error(format!("Failed to parse a line in .env file: {:?}", msg))
+                }
+                Error::EnvVar(msg) => {
+                    config_error(format!("Failed to load var from .env file: {:?}", msg))
+                }
+            },
         }
 
         // Add in settings from the environment (with a prefix)
         conf.merge(Environment::with_prefix(CRATE_NAME))
-            .unwrap_or_else(|err| config_error(format!("Failed to read environment settings: {:?}", err)));
+            .unwrap_or_else(|err| {
+                config_error(format!("Failed to read environment settings: {:?}", err))
+            });
 
         // You may also programmatically change settings
         conf.set("run_mode", mode).unwrap();

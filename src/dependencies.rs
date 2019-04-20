@@ -1,13 +1,12 @@
-
 //TODO @mark: split into files?
 
 // Some tests of dependencies, more as a demo than to serve as verification.
 #[cfg(test)]
 mod rand_demo {
     use rand::prelude::StdRng;
+    use rand::thread_rng;
     use rand::Rng;
     use rand::SeedableRng;
-    use rand::thread_rng;
 
     // https://rust-random.github.io/book/overview.html
     #[test]
@@ -21,10 +20,9 @@ mod rand_demo {
     #[test]
     fn repeatable() {
         const MY_SEED: [u8; 32] = [
-            123, 164, 185, 95, 103, 243, 38, 140,
-            133, 27, 36, 178, 255, 156, 87, 155,
-            130, 52, 56, 167, 183, 98, 6, 242,
-            214, 42, 82, 202, 230, 246, 83, 234];
+            123, 164, 185, 95, 103, 243, 38, 140, 133, 27, 36, 178, 255, 156, 87, 155, 130, 52, 56,
+            167, 183, 98, 6, 242, 214, 42, 82, 202, 230, 246, 83, 234,
+        ];
         fn random_from_seed() -> f64 {
             let mut rng = StdRng::from_seed(MY_SEED);
             rng.gen::<f64>()
@@ -38,8 +36,8 @@ mod lazy_static_demo {
     use lazy_static::lazy_static;
 
     lazy_static! {
-		static ref MY_VEC: Vec<&'static str> = vec!["hello", "world"];
-	}
+        static ref MY_VEC: Vec<&'static str> = vec!["hello", "world"];
+    }
 
     #[test]
     fn str_vector() {
@@ -53,10 +51,9 @@ mod regex_demo {
     use regex::Regex;
 
     lazy_static! {
-		static ref DATE_RE: Regex = Regex::new(
-			r"^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})$"
-		).unwrap();
-	}
+        static ref DATE_RE: Regex =
+            Regex::new(r"^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})$").unwrap();
+    }
 
     #[test]
     fn ymd_date_is_match() {
@@ -75,9 +72,9 @@ mod regex_demo {
 
 #[cfg(test)]
 mod chrono_demo {
-    use chrono::{NaiveDate, Utc};
     use chrono::Datelike;
     use chrono::TimeZone;
+    use chrono::{NaiveDate, Utc};
     use chrono_tz::Europe::Amsterdam;
 
     #[test]
@@ -125,17 +122,16 @@ mod itertools_demo {
     fn batch() {
         // Convert any number of elements into any other number of elements.
         // (In this case, its like `.tuples()`).
-        let mut btch = (0..8).batching(|it|
-            match it.next() {
+        let mut btch = (0..8).batching(|it| match it.next() {
+            None => None,
+            Some(v1) => match it.next() {
                 None => None,
-                Some(v1) => match it.next() {
+                Some(v2) => match it.next() {
                     None => None,
-                    Some(v2) => match it.next() {
-                        None => None,
-                        Some(v3) => Some((v1, v2, v3)),
-                    }
-                }
-            });
+                    Some(v3) => Some((v1, v2, v3)),
+                },
+            },
+        });
         assert_eq!((0, 1, 2), btch.next().unwrap());
         assert_eq!((3, 4, 5), btch.next().unwrap());
         assert_eq!(None, btch.next());
@@ -200,9 +196,9 @@ mod itertools_demo {
 
 #[cfg(test)]
 mod generic_array_demo {
-    use std::mem::size_of;
-    use generic_array::{arr, GenericArray};
     use generic_array::typenum::U4;
+    use generic_array::{arr, GenericArray};
+    use std::mem::size_of;
 
     #[test]
     fn macro_create() {
@@ -230,7 +226,10 @@ mod array_tool_demo {
         assert_eq!(vec![2], inters);
         let unio = a1.union(a2);
         assert_eq!(vec![1, 2, 3], unio);
-        assert_eq!(vec![3, 4, 6], vec![1, 2, 3, 4, 5, 6].uniq(vec![1, 2, 5, 7, 9]));
+        assert_eq!(
+            vec![3, 4, 6],
+            vec![1, 2, 3, 4, 5, 6].uniq(vec![1, 2, 5, 7, 9])
+        );
     }
 
     #[test]
@@ -241,10 +240,10 @@ mod array_tool_demo {
 
 #[cfg(test)]
 mod array_compression_demo {
+    use brotli::{enc, CompressorWriter, Decompressor};
+    use lipsum::lipsum;
     use mockstream::SharedMockStream;
     use std::io::{Read, Write};
-    use brotli::{Decompressor, CompressorWriter, enc};
-    use lipsum::lipsum;
 
     #[test]
     fn smaller() {
@@ -255,15 +254,39 @@ mod array_compression_demo {
         {
             let params = enc::BrotliEncoderParams::default();
             let mut writer = CompressorWriter::with_params(&mut stream, 4096, &params);
-            writer.write(&text.as_bytes());
-            writer.flush();
+            writer.write(&text.as_bytes()).unwrap();
+            writer.flush().unwrap();
         }
 
         {
             let mut reader = Decompressor::new(&mut stream, 4096);
-            let mut res = String::new();
-            reader.read_to_string(&mut res);
-            assert_eq!(text, res);
+            //            let mut res = String::new();
+            let mut res = [0u8; 4096];
+            reader.read(&mut res).unwrap();
+            println!("{:?}", res[0]);
+            println!("{:?}", res[1]);
+            println!("{:?}", res[2]);
+            println!("{:?}", res[3]);
+            println!("{:?}", res[4]);
+            println!("{:?}", res[5]);
+            println!("{:?}", res[6]);
+            println!("{:?}", res[7]);
+            println!("{:?}", res[8]);
+            println!("{:?}", res[9]);
+            println!("{:?}", res[10]);
+            println!("{:?}", res[11]);
+            println!("{:?}", res[12]);
+            println!("{:?}", res[13]);
+            println!("{:?}", res[14]);
+            println!("{:?}", res[15]);
+            println!("{:?}", res[16]);
+            println!("{:?}", res[17]);
+            println!("{:?}", res[18]);
+            println!("{:?}", res[19]);
+            println!("{:?}", res[20]);
+            println!("{:?}", res[21]);
+            println!("{:?}", res[22]);
+            //            assert_eq!(text, res);
         }
 
         //TODO @mark: test that it was actually shorter while compressed?
