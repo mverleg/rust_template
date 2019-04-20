@@ -214,3 +214,24 @@ mod generic_array_demo {
     }
 }
 
+#[cfg(test)]
+mod array_tool_demo {
+    use array_tool::string::WordWrap;
+    use array_tool::vec::{Intersect, Union, Uniq};
+
+    #[test]
+    fn vector_set() {
+        let a1 = vec![1, 1, 2];
+        let a2 = vec![2, 3, 3];
+        let inters = a1.intersect(a2.clone());
+        assert_eq!(vec![2], inters);
+        let unio = a1.union(a2);
+        assert_eq!(vec![1, 2, 3], unio);
+        assert_eq!(vec![3, 4, 6], vec![1, 2, 3, 4, 5, 6].uniq(vec![1, 2, 5, 7, 9]));
+    }
+
+    #[test]
+    fn strings() {
+        assert_eq!("asd asdf\nasd", "asd asdf asd".word_wrap(8));
+    }
+}
