@@ -96,6 +96,8 @@ mod chrono_demo {
 #[cfg(test)]
 mod itertools_demo {
     use itertools::{Itertools};
+    use std::collections::HashSet;
+    use std::iter::FromIterator;
 
     #[test]
     fn interleave() {
@@ -170,6 +172,24 @@ mod itertools_demo {
         assert_eq!(12, it.next().unwrap());
         assert_eq!(15, it.next().unwrap());
         assert_eq!(15, it.next().unwrap());
+        assert_eq!(None, it.next());
+    }
+
+    #[test]
+    fn cartesian_product() {
+        let suit = vec!["♤", "♥", "♢", "♣"].into_iter();
+        let rank = 2..15;
+        let deck = HashSet::<(&str, u8)>::from_iter(suit.cartesian_product(rank).into_iter());
+        assert_eq!(52, deck.len());
+        assert!(deck.contains(&("♥", 2)));
+    }
+
+    #[test]
+    fn filtering() {
+        // Get positions of items divisible by 3 after the 8th
+        let mut it = (0..15).dropping(8).positions(|i| i % 3 == 0);
+        assert_eq!(1, it.next().unwrap());
+        assert_eq!(4, it.next().unwrap());
         assert_eq!(None, it.next());
     }
 }
