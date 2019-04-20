@@ -13,5 +13,5 @@ Checklist
 * Change to another license than BSD if desired.
 * Possibly update dependencies.
 * Replace this readme.
-
+* Enable Travis CI for the repo.
 
