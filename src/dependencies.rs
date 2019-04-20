@@ -241,6 +241,31 @@ mod array_tool_demo {
 
 #[cfg(test)]
 mod array_compression_demo {
+    use mockstream::SharedMockStream;
+    use std::io::{Read, Write};
+    use brotli::{Decompressor, CompressorWriter, enc};
+    use lipsum::lipsum;
+
     #[test]
-    fn smaller() {}
+    fn smaller() {
+        let mut stream = SharedMockStream::new();
+
+        let text = lipsum(100);
+
+        {
+            let params = enc::BrotliEncoderParams::default();
+            let mut writer = CompressorWriter::with_params(&mut stream, 4096, &params);
+            writer.write(&text.as_bytes());
+            writer.flush();
+        }
+
+        {
+            let mut reader = Decompressor::new(&mut stream, 4096);
+            let mut res = String::new();
+            reader.read_to_string(&mut res);
+            assert_eq!(text, res);
+        }
+
+        //TODO @mark: test that it was actually shorter while compressed?
+    }
 }
