@@ -5,7 +5,7 @@
     <option name="allFeatures" value="true" />
     <option name="nocapture" value="false" />
     <option name="backtrace" value="SHORT" />
-    <option name="workingDirectory" value="file://rust_template/src" />
+    <option name="workingDirectory" value="file://rust_template" />
     <envs />
     <method v="2" />
   </configuration>
