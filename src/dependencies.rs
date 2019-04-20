@@ -6,6 +6,7 @@ mod tests {
     use rand::Rng;
     use rand::thread_rng;
     use rand::SeedableRng;
+    use lazy_static::lazy_static;
 
     // https://rust-random.github.io/book/overview.html
     #[test]
@@ -28,5 +29,14 @@ mod tests {
             rng.gen::<f64>()
         }
         assert_eq!(random_from_seed(), random_from_seed());
+    }
+
+    lazy_static! {
+        static ref MY_VEC: Vec<&'static str> = vec!["hello", "world"];
+    }
+
+    #[test]
+    fn lazy_static_vec() {
+        assert_eq!("hello", MY_VEC[0]);
     }
 }
