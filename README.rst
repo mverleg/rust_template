@@ -8,8 +8,8 @@ Checklist
 -------------------------------
 
 * Update the name and other details in Cargo.toml.
+* Change to another license than BSD if desired.
 * Replace this readme.
-* Change to another license, if desired.
 
 
 
