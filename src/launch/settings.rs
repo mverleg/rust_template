@@ -1,6 +1,10 @@
-use config::{Config, ConfigError, Environment, File};
 use std::convert::Into;
 use std::env;
+
+use config::{Config, ConfigError, Environment, File};
+use serde::Deserialize;
+
+use super::CRATE_NAME;
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -12,6 +16,13 @@ pub struct Settings {
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
         let mut conf = Config::new();
+
+        // TODO @mark: Files are read in this order:
+        // * user profile (e.g. inside ~/.config/)
+        // * base settings (config.yaml)
+        // * [mode].yaml (from RUN_MODE, i.e. development.yaml)
+        // * local.yaml (do not check this into VCS)
+        // * environment
 
         // Start with the "default" configuration file.
         conf.merge(File::with_name("src/launch/config.defaults.yaml"))?;
@@ -26,16 +37,11 @@ impl Settings {
         // Add in a local configuration file
         conf.merge(File::with_name("config/local.yaml").required(false))?;
 
-        // Add in settings from the environment (with a prefix of APP)
-        // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-        conf.merge(Environment::with_prefix("app"))?;
+        // Add in settings from the environment (with a prefix)
+        conf.merge(Environment::with_prefix(CRATE_NAME))?;
 
         // You may also programmatically change settings
-        conf.set("database.url", "postgres://")?;
-
-        // Now that we're done, let's access our configuration
-        println!("debug: {:?}", conf.get_bool("debug"));
-        println!("database: {:?}", conf.get::<String>("database.url"));
+        conf.set("run_mode", mode)?;
 
         // You can deserialize (and thus freeze) the entire configuration as
         conf.try_into()

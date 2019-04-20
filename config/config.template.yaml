@@ -4,6 +4,8 @@
 # Files are read in this order:
 # * user profile (e.g. inside ~/.config/)
 # * base settings (config.yaml)
-# * [mode].yaml (from RUN_MODE, i.e. development)
+# * [mode].yaml (from RUN_MODE, i.e. development.yaml)
+# * local.yaml (do not check this into VCS)
+# * environment with crate name as prefix (e.g. MYCRATE_LOG_LEVEL)
 
 log_level: "trace"
