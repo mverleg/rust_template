@@ -118,7 +118,7 @@ mod itertools_demo {
     #[test]
     fn batch() {
         // Convert any number of elements into any other number of elements.
-        // (In this case, implements fixed-size chunks that drops incomplete last chunk).
+        // (In this case, its like `.tuples()`).
         let mut btch = (0..8).batching(|it|
             match it.next() {
                 None => None,
@@ -142,6 +142,35 @@ mod itertools_demo {
         assert_eq!([0, 1, 2], cnk.next().unwrap());
         assert_eq!([3, 4, 5], cnk.next().unwrap());
         assert_eq!([6, 7], cnk.next().unwrap());
+    }
+
+    #[test]
+    fn tee() {
+        let mut it = 0..2;
+        it.next();
+        let (mut it1, mut it2) = it.tee();
+        assert_eq!(1, it1.next().unwrap());
+        assert_eq!(1, it2.next().unwrap());
+        assert_eq!(None, it1.next());
+        assert_eq!(None, it2.next());
+    }
+
+    #[test]
+    fn merge() {
+        let a = (0..16).step_by(3);
+        let b = (0..16).step_by(5);
+        let mut it = a.merge(b);
+        assert_eq!(0, it.next().unwrap());
+        assert_eq!(0, it.next().unwrap());
+        assert_eq!(3, it.next().unwrap());
+        assert_eq!(5, it.next().unwrap());
+        assert_eq!(6, it.next().unwrap());
+        assert_eq!(9, it.next().unwrap());
+        assert_eq!(10, it.next().unwrap());
+        assert_eq!(12, it.next().unwrap());
+        assert_eq!(15, it.next().unwrap());
+        assert_eq!(15, it.next().unwrap());
+        assert_eq!(None, it.next());
     }
 }
 
