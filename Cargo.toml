@@ -1,13 +1,43 @@
+cargo-features = ["profile-overrides"]
+
 [package]
 name = "my_new_project"
 version = "0.1.0"
 authors = ["Mark <mverleg.noreply@gmail.com>"]
 edition = "2018"
+
 build = "build/build.rs"
+include = ["src/**/*", "Cargo.toml", "LICENSE.txt", "README.rst"]
+
+publish = false
+readme = "README.rst"
+license = "BSD-3-Clause"
+keywords = []
+
+[badges]
+#travis-ci = { repository = "https://github.com/mverleg/rust_template", branch = "master" }
+#coveralls = { repository = "...", branch = "master", service = "github" }
+#is-it-maintained-issue-resolution = { repository = "..." }
+#is-it-maintained-open-issues = { repository = "..." }
+
+[features]
 
 [[bin]]
 name = "my_new_project"
 path = "src/main.rs"
+required-features = []
+
+[profile.dev.overrides."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+lto = true
+
+#TODO for web, use opt-level 'z'
 
 [dependencies]
 # Utilities

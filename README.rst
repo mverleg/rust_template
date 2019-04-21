@@ -22,8 +22,8 @@ Checklist
 * `rustup component add clippy-preview`
 * `rustup component add rustfmt`
 * Update the name and other details in Cargo.toml.
-* Change to another license than BSD if desired.
+* Change to another license than BSD if desired (LICENSE.txt, Cargo.toml).
 * Possibly update dependencies.
 * Replace this readme.
 * Enable Travis CI for the repo.
-* Update the image links at the top of this file.
+* Update the badges at the top of this file and in Cargo.toml.
