@@ -11,3 +11,8 @@ script:
   - cargo clippy --all-targets --all-features -- -D warnings
   - cargo build
   - cargo test
+matrix:
+  allow_failures:
+    # nightly fails too often due to clippy/fmt not being available
+    - rust: nightly
+  fast_finish: true
