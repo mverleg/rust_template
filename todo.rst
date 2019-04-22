@@ -20,3 +20,8 @@ bson or messagepack (or something that works with json schema to save even more)
 
 test coverage badge?
 
+
+
+web:
+stdweb
+webpack
