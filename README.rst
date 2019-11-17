@@ -13,8 +13,12 @@
 Rust template project
 ===============================
 
+This is an example layout for a Rust project. It is focussed towards
 
+1) Having a Rust webserver, available through Kubernetes with accompanying services.
+2) A reusable core of business logic, accessible from multiple platforms (WebAssembly, Android, iOS).
 
+It's not ready yet, but may contain useful examples.
 
 Checklist
 -------------------------------
@@ -27,3 +31,4 @@ Checklist
 * Replace this readme.
 * Enable Travis CI for the repo.
 * Update the badges at the top of this file and in Cargo.toml.
+* Add date in ``RELEASES.rst``
