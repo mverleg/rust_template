@@ -4,7 +4,7 @@ use std::process::exit;
 
 use config::{Config, Environment, File};
 use directories::ProjectDirs;
-use dotenv::{dotenv, Error};
+use dotenv;
 use serde::Deserialize;
 
 use super::CRATE_NAME;
@@ -79,16 +79,17 @@ impl Settings {
             });
 
         // Read .env file into environment
-        match dotenv() {
+        match dotenv::dotenv() {
             Ok(_) => (),
             Err(err) => match err {
-                Error::Io(_) => (), /* perhaps the .env file did not exist, which is okay */
-                Error::LineParse(msg) => {
+                dotenv::Error::Io(_) => (), /* perhaps the .env file did not exist, which is okay */
+                dotenv::Error::LineParse(msg, _) => {
                     config_error(format!("Failed to parse a line in .env file: {:?}", msg))
                 }
-                Error::EnvVar(msg) => {
+                dotenv::Error::EnvVar(msg) => {
                     config_error(format!("Failed to load var from .env file: {:?}", msg))
                 }
+                _ => panic!("Non-exhaustive dotenv error match"),
             },
         }
 
