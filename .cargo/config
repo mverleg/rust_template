@@ -1,0 +1,8 @@
+
+[build]
+# Compile for native architecture
+rustflags = [
+	"-C",
+	"target-cpu=native"
+]
+
