@@ -295,3 +295,33 @@ mod array_compression_demo {
         //TODO @mark: test that it was actually shorter while compressed?
     }
 }
+
+#[cfg(test)]
+mod bincode_serde {
+    use std::mem::size_of;
+    use ::serde::{Deserialize, Serialize};
+    use ::bincode;
+
+    #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+    struct Location(f64, f64, f64);
+    #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+    struct Thing {
+        name: String,
+        age: u16,
+        location: Location
+    }
+
+    #[test]
+    //noinspection RsApproxConstant
+    fn encode_decode_smaller() {
+        let original = vec![
+            Some(Thing { name: "Alpha".to_owned(), age: 37, location: Location(3.1416, 2.7182, -999_999_999.999_999_999) }),
+            Some(Thing { name: "Beta".to_owned(), age: 111, location: Location(-1.0, 1.0, 0.0) }),
+            None,
+        ];
+        let data = bincode::serialize(&original).unwrap();
+        assert!(data.len() <= 2 * size_of::<Thing>());
+        let back: Vec<Option<Thing>> = bincode::deserialize(&data).unwrap();
+        assert_eq!(original, back);
+    }
+}
