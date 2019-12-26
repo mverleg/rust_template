@@ -1,12 +1,23 @@
 //TODO @mark: split into files?
 
+use ::serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+struct Location(f64, f64, f64);
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+struct Thing {
+    name: String,
+    age: u16,
+    location: Location
+}
+
 // Some tests of dependencies, more as a demo than to serve as verification.
 #[cfg(test)]
 mod rand_demo {
     use rand::prelude::StdRng;
-    use rand::thread_rng;
     use rand::Rng;
     use rand::SeedableRng;
+    use rand::thread_rng;
 
     // https://rust-random.github.io/book/overview.html
     #[test]
@@ -48,8 +59,9 @@ mod lazy_static_demo {
 
 #[cfg(test)]
 mod regex_demo {
-    use lazy_static::lazy_static;
     use regex::Regex;
+
+    use lazy_static::lazy_static;
 
     lazy_static! {
         static ref DATE_RE: Regex =
@@ -73,9 +85,9 @@ mod regex_demo {
 
 #[cfg(test)]
 mod chrono_demo {
+    use chrono::{NaiveDate, Utc};
     use chrono::Datelike;
     use chrono::TimeZone;
-    use chrono::{NaiveDate, Utc};
     use chrono_tz::Europe::Amsterdam;
 
     #[test]
@@ -197,9 +209,10 @@ mod itertools_demo {
 
 #[cfg(test)]
 mod generic_array_demo {
-    use generic_array::typenum::U4;
-    use generic_array::{arr, GenericArray};
     use std::mem::size_of;
+
+    use generic_array::{arr, GenericArray};
+    use generic_array::typenum::U4;
 
     #[test]
     fn macro_create() {
@@ -241,10 +254,11 @@ mod array_tool_demo {
 
 #[cfg(test)]
 mod array_compression_demo {
-    use brotli::{enc, CompressorWriter, Decompressor};
-    use lipsum::lipsum;
-    use mockstream::SharedMockStream;
     use std::io::{Read, Write};
+
+    use ::brotli::{CompressorWriter, Decompressor, enc};
+    use ::lipsum::lipsum;
+    use ::mockstream::SharedMockStream;
 
     //TODO @mark: re-enable
     // #[test]
@@ -299,17 +313,10 @@ mod array_compression_demo {
 #[cfg(test)]
 mod bincode_serde {
     use std::mem::size_of;
-    use ::serde::{Deserialize, Serialize};
+
     use ::bincode;
 
-    #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-    struct Location(f64, f64, f64);
-    #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
-    struct Thing {
-        name: String,
-        age: u16,
-        location: Location
-    }
+    use super::{Location, Thing};
 
     #[test]
     //noinspection RsApproxConstant
@@ -323,5 +330,29 @@ mod bincode_serde {
         assert!(data.len() <= 2 * size_of::<Thing>());
         let back: Vec<Option<Thing>> = bincode::deserialize(&data).unwrap();
         assert_eq!(original, back);
+    }
+}
+
+#[cfg(test)]
+mod smallvec {
+    use std::mem::size_of;
+
+    use ::smallvec::{smallvec, SmallVec};
+
+    use super::Location;
+
+    #[test]
+    //noinspection RsApproxConstant
+    fn growing_small_vec() {
+        assert_eq!(3 * size_of::<Location>() + 2 * 8, size_of::<SmallVec<[Location; 3]>>());
+        let mut data: SmallVec<[Location; 3]> = smallvec![Location(-1.0, 1.0, 0.0), Location(-1.0, 1.0, 1.0)];
+        data.push(Location(-1.0, 1.0, 0.0));
+        assert!(!data.spilled());
+        data.push(Location(-1.0, 1.0, 0.0));
+        assert!(data.spilled());
+        data.pop();
+        assert!(data.spilled());
+        data.shrink_to_fit();
+        assert!(!data.spilled());
     }
 }

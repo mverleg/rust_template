@@ -57,6 +57,7 @@ bincode = "^1.2.1"
 serde = { version = "1.0.102", features = ["derive"] } # TODO version, tests
 dotenv = "^0.15.0"
 human-panic = "^1.0.1"
+smallvec = "^1.1.0"
 
 # Application
 brotli = "^3.3.0"
