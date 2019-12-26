@@ -356,3 +356,23 @@ mod smallvec {
         assert!(!data.spilled());
     }
 }
+
+mod ndarray {
+    use ::ndarray;
+    use ::rand::distributions::Uniform;
+    use ::ndarray::Array;
+    use ::ndarray_rand::RandomExt;
+
+    #[test]
+    //noinspection RsApproxConstant
+    fn ndarray_2d() {
+        let mut rng = Isaac64Rng::seed_from_u64(42);
+        let arr = Array::random_using(
+            (10, 10),
+            Uniform::new(-10., 10.),
+            rng
+        );
+        //TODO @mark: eig
+        panic!();
+    }
+}
