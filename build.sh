@@ -48,8 +48,14 @@ fi
 
 # Check the dependency versions.
 # Note that things can still get outdated *after* release.
-showrun cargo audit --deny-warnings
-showrun cargo outdated --exit-code 1
+if [[ ! -d "target" ]] || [[ ! -f "target/dependencies-checked" ]] || [[ $(($(date +%s) - $(stat -c '%Y' "target/dependencies-checked"))) -gt 3600 ]]
+then
+    showrun cargo audit --deny-warnings
+    showrun cargo outdated --exit-code 1
+    if [[ -d "target" ]]; then touch "target/dependencies-checked"; fi
+else
+    printf "Skipping dependency checks, because they were already done within the last hour\n"
+fi
 
 # Build dependencies, as they shouldn't affect clippy etc.
 #showrun cargo build-deps --release 1>/dev/null
@@ -81,20 +87,24 @@ showrun cargo fmt -- --check
 showrun cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 # Build (to test, and prepare for tests).
-showrun cargo build --workspace --release -- -D warnings
+#TODO @mark: can this fail on warnings?
+showrun cargo build --workspace
 
 # Run all the tests.
-showrun cargo test --workspace --release -- -D warnings
+#TODO @mark: can this fail on warnings?
+showrun cargo test --workspace
 
 # Do not run benchmarks as it is too slow to do every time.
 
 # Try to build the documentation.
-showrun cargo doc --all-features -- -D warnings
+showrun cargo doc --all-features
 
 if [[ $* == *--fix* ]] && [[ -n "$(git status --porcelain)" ]]
 then
     printf "Automatic changes were made, do not forget to commit them!\n"
 fi
 
+#TODO @mark: prevent duplicate dependencies
+#TODO @mark: create a --release artifact?
 #TODO @mark: code coverage?
 #TODO @mark: PGO?

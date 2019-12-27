@@ -327,12 +327,13 @@ mod bincode_serde {
 
     #[test]
     //noinspection RsApproxConstant
+    #[allow(clippy::approx_constant)]
     fn encode_decode_smaller() {
         let original = vec![
             Some(Thing {
                 name: "Alpha".to_owned(),
                 age: 37,
-                location: Location(3.1416, 2.7182, -999_999_999.999_999_999),
+                location: Location(3.1416, 2.7182, -999_999_999.999_999),
             }),
             Some(Thing {
                 name: "Beta".to_owned(),
@@ -376,6 +377,7 @@ mod smallvec {
     }
 }
 
+#[cfg(test)]
 mod ndarray {
     /// An overview of methods can be found at:
     /// https://docs.rs/ndarray/0.13.0/ndarray/doc/ndarray_for_numpy_users/
@@ -395,7 +397,7 @@ mod ndarray {
         let b = Array2::random_using((7, 10), Uniform::new(0., 1.), &mut rng);
         let c = a.dot(&b);
         assert_eq!(&[10, 10], c.shape());
-        assert_abs_diff_eq!(-15.666947811241746, c[[2, 4]], epsilon = 1.0e-10);
+        assert_abs_diff_eq!(-15.666_947_811_241_746, c[[2, 4]], epsilon = 1.0e-10);
     }
 
     #[test]
@@ -412,11 +414,13 @@ mod ndarray {
             .eigh(UPLO::Upper)
             .expect("eigenvalue decomposition failed");
         let top = e.fold(std::f64::MIN, |a, b| if &a > b { a } else { *b });
-        assert_abs_diff_eq!(26.83639167584528, top, epsilon = 1.0e-10);
+        assert_abs_diff_eq!(26.836_391_675_845_28, top, epsilon = 1.0e-10);
     }
 }
 
+#[cfg(test)]
 mod num {
+    use ::approx::assert_abs_diff_eq;
     use ::num::rational::Ratio;
     use ::num::BigInt;
     use ::num::BigRational;
@@ -424,12 +428,13 @@ mod num {
     use ::num::FromPrimitive;
 
     #[test]
+    #[allow(clippy::neg_multiply)]
     fn complex() {
         let a = Complex::new(2.0, 5.0);
         let b = Complex::new(-3.0, -1.0);
         let c = a * b;
-        assert_eq!(2.0 * -3.0 - 5.0 * -1.0, c.re);
-        assert_eq!(2.0 * -1.0 + 5.0 * -3.0, c.im);
+        assert_abs_diff_eq!(2.0 * -3.0 - 5.0 * -1.0, c.re, epsilon = 1.0e-10);
+        assert_abs_diff_eq!(2.0 * -1.0 + 5.0 * -3.0, c.im, epsilon = 1.0e-10);
         let d = Complex::new(BigInt::from_i8(2).unwrap(), BigInt::from_i8(5).unwrap());
         let e = Complex::new(BigInt::from_i8(-3).unwrap(), BigInt::from_i8(-1).unwrap());
         let f = d * e;
@@ -463,13 +468,11 @@ mod num {
             BigInt::from_u64(22_360_679_775).unwrap(),
             BigInt::from_u64(10_000_000_000).unwrap(),
         );
-        assert!(
-            approx.clone() - known.clone() < epsilon.clone()
-                && known.clone() - approx.clone() > -epsilon.clone()
-        );
+        assert!(approx.clone() - known.clone() < epsilon.clone() && known - approx > -epsilon);
     }
 }
 
+#[cfg(test)]
 mod complex_ndarray {
     use ::ndarray::array;
     use ::ndarray::Array2;
