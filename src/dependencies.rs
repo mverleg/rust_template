@@ -212,7 +212,7 @@ mod generic_array_demo {
     use std::mem::size_of;
 
     use generic_array::{arr, GenericArray};
-    use generic_array::typenum::U4;
+    use generic_array::typenum::U5;
 
     #[test]
     fn macro_create() {
@@ -223,7 +223,7 @@ mod generic_array_demo {
 
     #[test]
     fn no_overhead() {
-        assert!(size_of::<GenericArray<u32, U4>>() == 16)
+        assert_eq!(4 * 5, size_of::<GenericArray<u32, U5>>());
     }
 }
 
@@ -358,9 +358,11 @@ mod smallvec {
 }
 
 mod ndarray {
+    /// An overview of methods can be found at:
+    /// https://docs.rs/ndarray/0.13.0/ndarray/doc/ndarray_for_numpy_users/
     use ::approx::assert_abs_diff_eq;
-    use ::ndarray::Array;
-    use ::ndarray::ArrayBase;
+    use ::ndarray::Array1;
+    use ::ndarray::Array2;
     use ::ndarray::Dim;
     use ::ndarray::OwnedRepr;
     use ::ndarray_linalg::eigh::Eigh;
@@ -373,9 +375,9 @@ mod ndarray {
     #[test]
     fn mul_2d() {
         let mut rng = XorShiftRng::seed_from_u64(42);
-        let a = Array::random_using((10, 7),
+        let a = Array2::random_using((10, 7),
             Uniform::new(-10., 10.), &mut rng);
-        let b = Array::random_using((7, 10),
+        let b = Array2::random_using((7, 10),
             Uniform::new(0., 1.), &mut rng);
         let c = a.dot(&b);
         assert_eq!(&[10, 10], c.shape());
@@ -384,8 +386,8 @@ mod ndarray {
 
     #[test]
     fn eigh_2d() {
-        let mut rng = XorShiftRng::seed_from_u64(42);
-        let mut a = Array::random_using((9, 9),
+        let mut rng = XorShiftRng::seed_from_u64(37);
+        let mut a = Array2::random_using((9, 9),
             Uniform::new(-10., 10.), &mut rng);
         // Make the matrix symmetric (thus Hermitian for reals)
         for i in 0 .. a.shape()[0] {
@@ -393,26 +395,26 @@ mod ndarray {
                 a[[i, j]] = a[[j, i]];
             }
         }
-        type Vector = ArrayBase<OwnedRepr<f64>, Dim<[usize; 1]>>;
-        let (e, _): (Vector, _) = a.eigh(UPLO::Upper).expect("eigenvalue decomposition failed");
-        assert_abs_diff_eq!(32.824746293304266, e[8], epsilon = 1.0e-10);
+        let (e, _) = a.eigh(UPLO::Upper).expect("eigenvalue decomposition failed");
+        let top = e.fold(std::f64::MIN, |a, b| if &a > b { a } else { *b });
+        assert_abs_diff_eq!(26.83639167584528, top, epsilon = 1.0e-10);
     }
 }
 
 mod num {
     use ::num::BigInt;
     use ::num::BigRational;
+    use ::num::Complex;
     use ::num::FromPrimitive;
     use ::num::rational::Ratio;
-    use ::num::Complex;
 
     #[test]
     fn complex() {
-        let a = Complex::new(2, 5);
-        let b = Complex::new(-3, -1);
+        let a = Complex::new(2.0, 5.0);
+        let b = Complex::new(-3.0, -1.0);
         let c = a * b;
-        assert_eq!(2 * -3 - 5 * -1, c.re);
-        assert_eq!(2 * -1 + 5 * -3, c.im);
+        assert_eq!(2.0 * -3.0 - 5.0 * -1.0, c.re);
+        assert_eq!(2.0 * -1.0 + 5.0 * -3.0, c.im);
         let d = Complex::new(BigInt::from_i8(2).unwrap(), BigInt::from_i8(5).unwrap());
         let e = Complex::new(BigInt::from_i8(-3).unwrap(), BigInt::from_i8(-1).unwrap());
         let f = d * e;
@@ -445,5 +447,42 @@ mod num {
 }
 
 mod complex_ndarray {
-    //TODO @mark:
+    use ::approx::assert_abs_diff_eq;
+    use ::ndarray::array;
+    use ::ndarray::Array;
+    use ::ndarray::Array2;
+    use ::ndarray::ArrayBase;
+    use ::ndarray::Dim;
+    use ::ndarray::OwnedRepr;
+    use ::ndarray_linalg::eigh::Eigh;
+    use ::ndarray_linalg::UPLO;
+    use ::ndarray_rand::RandomExt;
+    use ::num::BigInt;
+    use ::num::BigRational;
+    use ::num::Complex;
+    use ::num::FromPrimitive;
+    use ::num::rational::Ratio;
+    use ::rand::distributions::Uniform;
+    use ::rand::SeedableRng;
+    use ::rand_xorshift::XorShiftRng;
+
+    #[test]
+    fn mul_2d() {
+        let mut a: Array2<_> = array![
+            [Complex::new(1.0, 2.0),
+            Complex::new(3.0, 5.0)],
+            [Complex::new(7.0, 11.0),
+            Complex::new(13.0, 17.0)]
+        ];
+        // 'b' is the complex conjugate of 'a'.
+        let mut b = a.clone();
+        b.mapv_inplace(|v| v.conj());
+        let (a, b) = (a, b);
+        // c = a * b
+        let c = a.dot(&b);
+        println!("{:?}", c);
+        // Check some values.
+        assert_eq!(Complex::new(1.0, 2.0) * Complex::new(1.0, -2.0) + Complex::new(3.0, 5.0) * Complex::new(7.0, -11.0), c[[0, 0]]);
+        assert_eq!(Complex::new(1.0, 2.0) * Complex::new(3.0, -5.0) + Complex::new(3.0, 5.0) * Complex::new(13.0, -17.0), c[[0, 1]]);
+    }
 }
