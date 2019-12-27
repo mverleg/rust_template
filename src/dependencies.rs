@@ -358,20 +358,22 @@ mod smallvec {
 }
 
 mod ndarray {
-    use ::ndarray;
     use ::rand::distributions::Uniform;
     use ::ndarray::Array;
     use ::ndarray_rand::RandomExt;
+    use ::rand::{SeedableRng};
+    use ::rand_xorshift::XorShiftRng;
 
     #[test]
     //noinspection RsApproxConstant
     fn ndarray_2d() {
-        let mut rng = Isaac64Rng::seed_from_u64(42);
-        let arr = Array::random_using(
-            (10, 10),
-            Uniform::new(-10., 10.),
-            rng
-        );
+        let mut rng = XorShiftRng::seed_from_u64(42);
+        let a = Array::random_using((10, 7),
+            Uniform::new(-10., 10.), &mut rng);
+        let b = Array::random_using((7, 10),
+            Uniform::new(0., 1.), &mut rng);
+        let c = a.dot(&b);
+        assert_eq!(&[10, 10], c.shape());
         //TODO @mark: eig
         panic!();
     }

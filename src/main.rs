@@ -1,3 +1,6 @@
+extern crate blas;
+extern crate openblas_src;
+
 mod dependencies;
 mod launch;
 

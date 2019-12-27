@@ -32,3 +32,15 @@ Checklist
 * Enable Travis CI for the repo.
 * Update the badges at the top of this file and in Cargo.toml.
 * Add date in ``RELEASES.rst``
+
+Troubleshooting
+-------------------------------
+
+* If you get an error like this while compiling::
+
+      undefined reference to `cblas_sgemm'
+
+  then you may need to install and integrate_ ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
+
+
+.. _integrate: https://github.com/blas-lapack-rs/blas-lapack-rs.github.io/wiki
