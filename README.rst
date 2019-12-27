@@ -13,7 +13,7 @@
 Rust template project
 ===============================
 
-This is an example layout for a Rust project. It is focussed towards
+This is an example layout for a Rust project. It is focused towards
 
 1) Having a Rust webserver, available through Kubernetes with accompanying services.
 2) A reusable core of business logic, accessible from multiple platforms (WebAssembly, Android, iOS).
@@ -40,7 +40,7 @@ Troubleshooting
 
       undefined reference to `cblas_sgemm'
 
-  then you may need to install and integrate_ ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
+  then you may need to integrate_ ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
 
 
 .. _integrate: https://github.com/blas-lapack-rs/blas-lapack-rs.github.io/wiki

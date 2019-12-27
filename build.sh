@@ -4,7 +4,7 @@ function showrun() {
     echo ">> $@"
     if ! "$@"
     then
-        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***" "'$*'\n" 1>&2
+        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***\n" "'$*'" 1>&2
         exit $?
     fi
 }
@@ -14,7 +14,7 @@ set -e  # fail if a command fails
 set -E  # technical change so traps work with -E
 set -o pipefail  # also include intermediate commands in -e
 set -u  # undefined variables are errors
-c
+
 # If your version of Rust does not support clippy or another component, check which version does at
 # https://rust-lang.github.io/rustup-components-history/index.html
 # then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
@@ -52,7 +52,7 @@ showrun cargo audit --deny-warnings
 showrun cargo outdated --exit-code 1
 
 # Build dependencies, as they shouldn't affect clippy etc.
-showrun cargo build-deps --release 1>/dev/null
+#showrun cargo build-deps --release 1>/dev/null
 
 # Fix formatting and compiler warnings, if --fix is given
 if [[ $* == *--fix* ]]
@@ -68,7 +68,7 @@ then
         showrun cargo install cargo-fix
     fi
     showrun cargo fmt
-    showrun cargo fix --workspace --all-targets --all-features
+    showrun cargo fix --clippy --workspace --all-targets --all-features -Z unstable-options
 fi
 
 # Clean already-compiled code for current project(s)

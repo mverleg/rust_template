@@ -11,6 +11,13 @@ struct Thing {
     location: Location,
 }
 
+#[cfg(test)]
+mod async_mio {
+
+    #[test]
+    fn mwe() {}
+}
+
 // Some tests of dependencies, more as a demo than to serve as verification.
 #[cfg(test)]
 mod rand_demo {
@@ -373,10 +380,7 @@ mod ndarray {
     /// An overview of methods can be found at:
     /// https://docs.rs/ndarray/0.13.0/ndarray/doc/ndarray_for_numpy_users/
     use ::approx::assert_abs_diff_eq;
-    use ::ndarray::Array1;
     use ::ndarray::Array2;
-    use ::ndarray::Dim;
-    use ::ndarray::OwnedRepr;
     use ::ndarray_linalg::eigh::Eigh;
     use ::ndarray_linalg::UPLO;
     use ::ndarray_rand::RandomExt;
@@ -467,38 +471,21 @@ mod num {
 }
 
 mod complex_ndarray {
-    use ::approx::assert_abs_diff_eq;
     use ::ndarray::array;
-    use ::ndarray::Array;
     use ::ndarray::Array2;
-    use ::ndarray::ArrayBase;
-    use ::ndarray::Dim;
-    use ::ndarray::OwnedRepr;
-    use ::ndarray_linalg::eigh::Eigh;
-    use ::ndarray_linalg::UPLO;
-    use ::ndarray_rand::RandomExt;
-    use ::num::rational::Ratio;
-    use ::num::BigInt;
-    use ::num::BigRational;
     use ::num::Complex;
-    use ::num::FromPrimitive;
-    use ::rand::distributions::Uniform;
-    use ::rand::SeedableRng;
-    use ::rand_xorshift::XorShiftRng;
 
     #[test]
     fn mul_2d() {
-        let mut a: Array2<_> = array![
+        let a: Array2<_> = array![
             [Complex::new(1.0, 2.0), Complex::new(3.0, 5.0)],
             [Complex::new(7.0, 11.0), Complex::new(13.0, 17.0)]
         ];
         // 'b' is the complex conjugate of 'a'.
         let mut b = a.clone();
         b.mapv_inplace(|v| v.conj());
-        let (a, b) = (a, b);
         // c = a * b
         let c = a.dot(&b);
-        println!("{:?}", c);
         // Check some values.
         assert_eq!(
             Complex::new(1.0, 2.0) * Complex::new(1.0, -2.0)
