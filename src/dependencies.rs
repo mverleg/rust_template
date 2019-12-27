@@ -401,34 +401,49 @@ mod ndarray {
 
 mod num {
     use ::num::BigInt;
+    use ::num::BigRational;
     use ::num::FromPrimitive;
     use ::num::rational::Ratio;
+    use ::num::Complex;
 
     #[test]
     fn complex() {
-        panic!();
+        let a = Complex::new(2, 5);
+        let b = Complex::new(-3, -1);
+        let c = a * b;
+        assert_eq!(2 * -3 - 5 * -1, c.re);
+        assert_eq!(2 * -1 + 5 * -3, c.im);
+        let d = Complex::new(BigInt::from_i8(2).unwrap(), BigInt::from_i8(5).unwrap());
+        let e = Complex::new(BigInt::from_i8(-3).unwrap(), BigInt::from_i8(-1).unwrap());
+        let f = d * e;
+        assert_eq!(BigInt::from_i8(2 * -3 - 5 * -1).unwrap(), f.re);
+        assert_eq!(BigInt::from_i8(2 * -1 + 5 * -3).unwrap(), f.im);
     }
 
     #[test]
     fn bigint() {
-        panic!();
+        let mut n = BigInt::from_u64(137).unwrap();
+        for _ in 0 .. 21 {
+            n *= 7;
+        }
+        assert!(n > BigInt::from_u64(::std::u64::MAX).unwrap());
     }
 
     #[test]
     fn ratio() {
         // Newton's method, from the manual: https://rust-num.github.io/num/num/index.html
         let two = Ratio::from_integer(FromPrimitive::from_u64(2).unwrap());
-        let start: Ratio<BigInt> = Ratio::from_integer(FromPrimitive::from_u64(5).unwrap());
+        let start: BigRational = Ratio::from_integer(FromPrimitive::from_u64(5).unwrap());
         let mut approx = start.clone();
-        for i in 0 .. 5 {
-            println!("i = {}", i);
+        for _ in 0 .. 5 {
             approx = (&approx + (&start / &approx)) / two.clone();
         }
-        println!("{:?}", approx);
-        let epsilon = Ratio::<BigInt>::new(BigInt::from_u64(1).unwrap(), BigInt::from_u64(1_000_000_000).unwrap());
-        let known = Ratio::<BigInt>::new(BigInt::from_u64(22_360_679_775).unwrap(), BigInt::from_u64(10_000_000_000).unwrap());
+        let epsilon = BigRational::new(BigInt::from_u64(1).unwrap(), BigInt::from_u64(1_000_000_000).unwrap());
+        let known = BigRational::new(BigInt::from_u64(22_360_679_775).unwrap(), BigInt::from_u64(10_000_000_000).unwrap());
         assert!(approx.clone() - known.clone() < epsilon.clone() && known.clone() - approx.clone() > -epsilon.clone());
-        // assert_abs_diff_eq!(32.824746293304266, approx, epsilon = 1.0e-10);
-        // https://rust-num.github.io/num/num/index.html
     }
+}
+
+mod complex_ndarray {
+    //TODO @mark:
 }
