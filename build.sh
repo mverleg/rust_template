@@ -1,48 +1,100 @@
 #!/usr/bin/env bash
 
-(
-    # Note that these sets are inside a subshell, so only for this function.
-    set -e  # fail if a command fails
-    set -E  # technical change so traps work with -E
-    set -o pipefail  # also include intermediate commands in -e
-    set -u  # undefined variables are errors
-    set -v  # show all the commands, without expanding variables
-
-    # Add components.
-    if ! rustup component list | grep -q rustfmt
+function showrun() {
+    echo ">> $@"
+    if ! "$@"
     then
-        rustup component add rustfmt
+        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***" "'$*'\n" 1>&2
+        exit $?
     fi
-    if ! rustup component list | grep -q clippy
+}
+
+# Note that these sets are inside the bash invoked above, so only for this script.
+set -e  # fail if a command fails
+set -E  # technical change so traps work with -E
+set -o pipefail  # also include intermediate commands in -e
+set -u  # undefined variables are errors
+c
+# If your version of Rust does not support clippy or another component, check which version does at
+# https://rust-lang.github.io/rustup-components-history/index.html
+# then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
+
+if ! hash sccache 2>/dev/null
+then
+    printf "Not using sccache (using sccache is recommended: https://github.com/mozilla/sccache)\n" 1>&2
+fi
+
+# Add components.
+if ! rustup component list | grep -q rustfmt
+then
+    showrun rustup component add rustfmt
+fi
+if ! rustup component list | grep -q clippy
+then
+    showrun rustup component add clippy
+fi
+if ! hash cargo-build-deps 2>/dev/null
+then
+    showrun cargo install cargo-build-deps
+fi
+if ! hash cargo-audit 2>/dev/null
+then
+    showrun cargo install cargo-audit
+fi
+if ! hash cargo-outdated 2>/dev/null
+then
+    showrun cargo install --force --git https://github.com/kbknapp/cargo-outdated
+fi
+
+# Check the dependency versions.
+# Note that things can still get outdated *after* release.
+showrun cargo audit --deny-warnings
+showrun cargo outdated --exit-code 1
+
+# Build dependencies, as they shouldn't affect clippy etc.
+showrun cargo build-deps --release 1>/dev/null
+
+# Fix formatting and compiler warnings, if --fix is given
+if [[ $* == *--fix* ]]
+then
+    if [[ -n "$(git status --porcelain)" ]]
     then
-        rustup component add clippy
+        printf "Refusing to apply compiler suggestions and rustfmt fixes as git reports that there are pending changes\n" 1>&2
+        exit 1
     fi
-    if ! hash cargo-audit 2>/dev/null
+    printf "Applying compiler suggestions and rustfmt fixes\n"
+    if ! hash cargo-fix 2>/dev/null
     then
-        cargo install cargo-audit
+        showrun cargo install cargo-fix
     fi
-    if ! hash cargo-outdated 2>/dev/null
-    then
-        cargo install --force --git https://github.com/kbknapp/cargo-outdated
-    fi
+    showrun cargo fmt
+    showrun cargo fix --workspace --all-targets --all-features
+fi
 
-    # Check formatting.
-    cargo fmt --all -- --check
+# Clean already-compiled code for current project(s)
+find . -maxdepth 3 -type f -name Cargo.toml | xargs grep '^\s*name\s*=\s*"' | sed -E 's/\s*name\s*=\s*"([^"]*)"\s*/\1/' | sort | uniq | xargs -I'{}' -- bash -c 'echo cargo clean -p {}; cargo clean -p {}'
 
-    # Check suspicious patterns.
-    cargo clippy --all-targets --all-features -- -D warnings
+# Check formatting.
+showrun cargo fmt -- --check
 
-    # Build (to test, and prepare for tests).
-    cargo build --all --release -D warnings
+# Check suspicious patterns.
+showrun cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-    # Run all the tests.
-    cargo test --all --release
+# Build (to test, and prepare for tests).
+showrun cargo build --workspace --release -- -D warnings
 
-    # Do not run benchmarks as it is too slow to do every time.
+# Run all the tests.
+showrun cargo test --workspace --release -- -D warnings
 
-    # Try to build the documentation.
-    cargo doc
+# Do not run benchmarks as it is too slow to do every time.
 
-    #TODO @mark: code coverage?
-    #TODO @mark: PGO?
-)
+# Try to build the documentation.
+showrun cargo doc --all-features -- -D warnings
+
+if [[ $* == *--fix* ]] && [[ -n "$(git status --porcelain)" ]]
+then
+    printf "Automatic changes were made, do not forget to commit them!\n"
+fi
+
+#TODO @mark: code coverage?
+#TODO @mark: PGO?
