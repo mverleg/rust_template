@@ -361,17 +361,17 @@ mod ndarray {
     use ::approx::assert_abs_diff_eq;
     use ::ndarray::Array;
     use ::ndarray::ArrayBase;
+    use ::ndarray::Dim;
+    use ::ndarray::OwnedRepr;
     use ::ndarray_linalg::eigh::Eigh;
     use ::ndarray_linalg::UPLO;
     use ::ndarray_rand::RandomExt;
     use ::rand::distributions::Uniform;
     use ::rand::SeedableRng;
     use ::rand_xorshift::XorShiftRng;
-    use ::ndarray::OwnedRepr;
-    use ::ndarray::Dim;
 
     #[test]
-    fn ndarray_2d_mul() {
+    fn mul_2d() {
         let mut rng = XorShiftRng::seed_from_u64(42);
         let a = Array::random_using((10, 7),
             Uniform::new(-10., 10.), &mut rng);
@@ -383,7 +383,7 @@ mod ndarray {
     }
 
     #[test]
-    fn ndarray_2d_eigh() {
+    fn eigh_2d() {
         let mut rng = XorShiftRng::seed_from_u64(42);
         let mut a = Array::random_using((9, 9),
             Uniform::new(-10., 10.), &mut rng);
@@ -396,5 +396,39 @@ mod ndarray {
         type Vector = ArrayBase<OwnedRepr<f64>, Dim<[usize; 1]>>;
         let (e, _): (Vector, _) = a.eigh(UPLO::Upper).expect("eigenvalue decomposition failed");
         assert_abs_diff_eq!(32.824746293304266, e[8], epsilon = 1.0e-10);
+    }
+}
+
+mod num {
+    use ::num::BigInt;
+    use ::num::FromPrimitive;
+    use ::num::rational::Ratio;
+
+    #[test]
+    fn complex() {
+        panic!();
+    }
+
+    #[test]
+    fn bigint() {
+        panic!();
+    }
+
+    #[test]
+    fn ratio() {
+        // Newton's method, from the manual: https://rust-num.github.io/num/num/index.html
+        let two = Ratio::from_integer(FromPrimitive::from_u64(2).unwrap());
+        let start: Ratio<BigInt> = Ratio::from_integer(FromPrimitive::from_u64(5).unwrap());
+        let mut approx = start.clone();
+        for i in 0 .. 5 {
+            println!("i = {}", i);
+            approx = (&approx + (&start / &approx)) / two.clone();
+        }
+        println!("{:?}", approx);
+        let epsilon = Ratio::<BigInt>::new(BigInt::from_u64(1).unwrap(), BigInt::from_u64(1_000_000_000).unwrap());
+        let known = Ratio::<BigInt>::new(BigInt::from_u64(22_360_679_775).unwrap(), BigInt::from_u64(10_000_000_000).unwrap());
+        assert!(approx.clone() - known.clone() < epsilon.clone() && known.clone() - approx.clone() > -epsilon.clone());
+        // assert_abs_diff_eq!(32.824746293304266, approx, epsilon = 1.0e-10);
+        // https://rust-num.github.io/num/num/index.html
     }
 }
