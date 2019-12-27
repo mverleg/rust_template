@@ -358,15 +358,20 @@ mod smallvec {
 }
 
 mod ndarray {
-    use ::rand::distributions::Uniform;
+    use ::approx::assert_abs_diff_eq;
     use ::ndarray::Array;
+    use ::ndarray::ArrayBase;
+    use ::ndarray_linalg::eigh::Eigh;
+    use ::ndarray_linalg::UPLO;
     use ::ndarray_rand::RandomExt;
-    use ::rand::{SeedableRng};
+    use ::rand::distributions::Uniform;
+    use ::rand::SeedableRng;
     use ::rand_xorshift::XorShiftRng;
+    use ::ndarray::OwnedRepr;
+    use ::ndarray::Dim;
 
     #[test]
-    //noinspection RsApproxConstant
-    fn ndarray_2d() {
+    fn ndarray_2d_mul() {
         let mut rng = XorShiftRng::seed_from_u64(42);
         let a = Array::random_using((10, 7),
             Uniform::new(-10., 10.), &mut rng);
@@ -374,7 +379,22 @@ mod ndarray {
             Uniform::new(0., 1.), &mut rng);
         let c = a.dot(&b);
         assert_eq!(&[10, 10], c.shape());
-        //TODO @mark: eig
-        panic!();
+        assert_abs_diff_eq!(-15.666947811241746, c[[2, 4]], epsilon = 1.0e-10);
+    }
+
+    #[test]
+    fn ndarray_2d_eigh() {
+        let mut rng = XorShiftRng::seed_from_u64(42);
+        let mut a = Array::random_using((9, 9),
+            Uniform::new(-10., 10.), &mut rng);
+        // Make the matrix symmetric (thus Hermitian for reals)
+        for i in 0 .. a.shape()[0] {
+            for j in i .. a.shape()[0] {
+                a[[i, j]] = a[[j, i]];
+            }
+        }
+        type Vector = ArrayBase<OwnedRepr<f64>, Dim<[usize; 1]>>;
+        let (e, _): (Vector, _) = a.eigh(UPLO::Upper).expect("eigenvalue decomposition failed");
+        assert_abs_diff_eq!(32.824746293304266, e[8], epsilon = 1.0e-10);
     }
 }
