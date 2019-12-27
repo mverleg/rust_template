@@ -8,16 +8,16 @@ struct Location(f64, f64, f64);
 struct Thing {
     name: String,
     age: u16,
-    location: Location
+    location: Location,
 }
 
 // Some tests of dependencies, more as a demo than to serve as verification.
 #[cfg(test)]
 mod rand_demo {
     use rand::prelude::StdRng;
+    use rand::thread_rng;
     use rand::Rng;
     use rand::SeedableRng;
-    use rand::thread_rng;
 
     // https://rust-random.github.io/book/overview.html
     #[test]
@@ -85,9 +85,9 @@ mod regex_demo {
 
 #[cfg(test)]
 mod chrono_demo {
-    use chrono::{NaiveDate, Utc};
     use chrono::Datelike;
     use chrono::TimeZone;
+    use chrono::{NaiveDate, Utc};
     use chrono_tz::Europe::Amsterdam;
 
     #[test]
@@ -211,8 +211,8 @@ mod itertools_demo {
 mod generic_array_demo {
     use std::mem::size_of;
 
-    use generic_array::{arr, GenericArray};
     use generic_array::typenum::U5;
+    use generic_array::{arr, GenericArray};
 
     #[test]
     fn macro_create() {
@@ -256,7 +256,7 @@ mod array_tool_demo {
 mod array_compression_demo {
     use std::io::{Read, Write};
 
-    use ::brotli::{CompressorWriter, Decompressor, enc};
+    use ::brotli::{enc, CompressorWriter, Decompressor};
     use ::lipsum::lipsum;
     use ::mockstream::SharedMockStream;
 
@@ -322,8 +322,16 @@ mod bincode_serde {
     //noinspection RsApproxConstant
     fn encode_decode_smaller() {
         let original = vec![
-            Some(Thing { name: "Alpha".to_owned(), age: 37, location: Location(3.1416, 2.7182, -999_999_999.999_999_999) }),
-            Some(Thing { name: "Beta".to_owned(), age: 111, location: Location(-1.0, 1.0, 0.0) }),
+            Some(Thing {
+                name: "Alpha".to_owned(),
+                age: 37,
+                location: Location(3.1416, 2.7182, -999_999_999.999_999_999),
+            }),
+            Some(Thing {
+                name: "Beta".to_owned(),
+                age: 111,
+                location: Location(-1.0, 1.0, 0.0),
+            }),
             None,
         ];
         let data = bincode::serialize(&original).unwrap();
@@ -344,8 +352,12 @@ mod smallvec {
     #[test]
     //noinspection RsApproxConstant
     fn growing_small_vec() {
-        assert_eq!(3 * size_of::<Location>() + 2 * 8, size_of::<SmallVec<[Location; 3]>>());
-        let mut data: SmallVec<[Location; 3]> = smallvec![Location(-1.0, 1.0, 0.0), Location(-1.0, 1.0, 1.0)];
+        assert_eq!(
+            3 * size_of::<Location>() + 2 * 8,
+            size_of::<SmallVec<[Location; 3]>>()
+        );
+        let mut data: SmallVec<[Location; 3]> =
+            smallvec![Location(-1.0, 1.0, 0.0), Location(-1.0, 1.0, 1.0)];
         data.push(Location(-1.0, 1.0, 0.0));
         assert!(!data.spilled());
         data.push(Location(-1.0, 1.0, 0.0));
@@ -375,10 +387,8 @@ mod ndarray {
     #[test]
     fn mul_2d() {
         let mut rng = XorShiftRng::seed_from_u64(42);
-        let a = Array2::random_using((10, 7),
-            Uniform::new(-10., 10.), &mut rng);
-        let b = Array2::random_using((7, 10),
-            Uniform::new(0., 1.), &mut rng);
+        let a = Array2::random_using((10, 7), Uniform::new(-10., 10.), &mut rng);
+        let b = Array2::random_using((7, 10), Uniform::new(0., 1.), &mut rng);
         let c = a.dot(&b);
         assert_eq!(&[10, 10], c.shape());
         assert_abs_diff_eq!(-15.666947811241746, c[[2, 4]], epsilon = 1.0e-10);
@@ -387,26 +397,27 @@ mod ndarray {
     #[test]
     fn eigh_2d() {
         let mut rng = XorShiftRng::seed_from_u64(37);
-        let mut a = Array2::random_using((9, 9),
-            Uniform::new(-10., 10.), &mut rng);
+        let mut a = Array2::random_using((9, 9), Uniform::new(-10., 10.), &mut rng);
         // Make the matrix symmetric (thus Hermitian for reals)
-        for i in 0 .. a.shape()[0] {
-            for j in i .. a.shape()[0] {
+        for i in 0..a.shape()[0] {
+            for j in i..a.shape()[0] {
                 a[[i, j]] = a[[j, i]];
             }
         }
-        let (e, _) = a.eigh(UPLO::Upper).expect("eigenvalue decomposition failed");
+        let (e, _) = a
+            .eigh(UPLO::Upper)
+            .expect("eigenvalue decomposition failed");
         let top = e.fold(std::f64::MIN, |a, b| if &a > b { a } else { *b });
         assert_abs_diff_eq!(26.83639167584528, top, epsilon = 1.0e-10);
     }
 }
 
 mod num {
+    use ::num::rational::Ratio;
     use ::num::BigInt;
     use ::num::BigRational;
     use ::num::Complex;
     use ::num::FromPrimitive;
-    use ::num::rational::Ratio;
 
     #[test]
     fn complex() {
@@ -425,7 +436,7 @@ mod num {
     #[test]
     fn bigint() {
         let mut n = BigInt::from_u64(137).unwrap();
-        for _ in 0 .. 21 {
+        for _ in 0..21 {
             n *= 7;
         }
         assert!(n > BigInt::from_u64(::std::u64::MAX).unwrap());
@@ -437,12 +448,21 @@ mod num {
         let two = Ratio::from_integer(FromPrimitive::from_u64(2).unwrap());
         let start: BigRational = Ratio::from_integer(FromPrimitive::from_u64(5).unwrap());
         let mut approx = start.clone();
-        for _ in 0 .. 5 {
+        for _ in 0..5 {
             approx = (&approx + (&start / &approx)) / two.clone();
         }
-        let epsilon = BigRational::new(BigInt::from_u64(1).unwrap(), BigInt::from_u64(1_000_000_000).unwrap());
-        let known = BigRational::new(BigInt::from_u64(22_360_679_775).unwrap(), BigInt::from_u64(10_000_000_000).unwrap());
-        assert!(approx.clone() - known.clone() < epsilon.clone() && known.clone() - approx.clone() > -epsilon.clone());
+        let epsilon = BigRational::new(
+            BigInt::from_u64(1).unwrap(),
+            BigInt::from_u64(1_000_000_000).unwrap(),
+        );
+        let known = BigRational::new(
+            BigInt::from_u64(22_360_679_775).unwrap(),
+            BigInt::from_u64(10_000_000_000).unwrap(),
+        );
+        assert!(
+            approx.clone() - known.clone() < epsilon.clone()
+                && known.clone() - approx.clone() > -epsilon.clone()
+        );
     }
 }
 
@@ -457,11 +477,11 @@ mod complex_ndarray {
     use ::ndarray_linalg::eigh::Eigh;
     use ::ndarray_linalg::UPLO;
     use ::ndarray_rand::RandomExt;
+    use ::num::rational::Ratio;
     use ::num::BigInt;
     use ::num::BigRational;
     use ::num::Complex;
     use ::num::FromPrimitive;
-    use ::num::rational::Ratio;
     use ::rand::distributions::Uniform;
     use ::rand::SeedableRng;
     use ::rand_xorshift::XorShiftRng;
@@ -469,10 +489,8 @@ mod complex_ndarray {
     #[test]
     fn mul_2d() {
         let mut a: Array2<_> = array![
-            [Complex::new(1.0, 2.0),
-            Complex::new(3.0, 5.0)],
-            [Complex::new(7.0, 11.0),
-            Complex::new(13.0, 17.0)]
+            [Complex::new(1.0, 2.0), Complex::new(3.0, 5.0)],
+            [Complex::new(7.0, 11.0), Complex::new(13.0, 17.0)]
         ];
         // 'b' is the complex conjugate of 'a'.
         let mut b = a.clone();
@@ -482,7 +500,15 @@ mod complex_ndarray {
         let c = a.dot(&b);
         println!("{:?}", c);
         // Check some values.
-        assert_eq!(Complex::new(1.0, 2.0) * Complex::new(1.0, -2.0) + Complex::new(3.0, 5.0) * Complex::new(7.0, -11.0), c[[0, 0]]);
-        assert_eq!(Complex::new(1.0, 2.0) * Complex::new(3.0, -5.0) + Complex::new(3.0, 5.0) * Complex::new(13.0, -17.0), c[[0, 1]]);
+        assert_eq!(
+            Complex::new(1.0, 2.0) * Complex::new(1.0, -2.0)
+                + Complex::new(3.0, 5.0) * Complex::new(7.0, -11.0),
+            c[[0, 0]]
+        );
+        assert_eq!(
+            Complex::new(1.0, 2.0) * Complex::new(3.0, -5.0)
+                + Complex::new(3.0, 5.0) * Complex::new(13.0, -17.0),
+            c[[0, 1]]
+        );
     }
 }
