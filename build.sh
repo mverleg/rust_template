@@ -9,6 +9,13 @@ function showrun() {
     fi
 }
 
+function clean_own_code_targets() {
+    find . -maxdepth 3 -type f -name Cargo.toml | xargs grep '^\s*name\s*=\s*"' |
+        sed -E 's/\s*name\s*=\s*"([^"]*)"\s*/\1/' |
+        sort | uniq |
+        xargs -I'{}' -- bash -c 'echo cargo clean -p {}; cargo clean -p {}'
+}
+
 if [[ ! -f "Cargo.toml" ]]
 then
     printf "'Cargo.toml' not found, this is not the project directory?\n" 1>&2
@@ -64,16 +71,26 @@ if ! hash cargo-deny 2>/dev/null
 then
     showrun cargo install cargo-deny
 fi
+if ! hash grcov 2>/dev/null
+then
+    showrun cargo install grcov
+fi
 
 # Check the dependency versions.
 # Note that things can still get outdated *after* release.
-if [[ ! -d "$CARGO_TARGET_DIR" ]] || [[ ! -f "$CARGO_TARGET_DIR/dependencies-checked" ]] || [[ $(($(date +%s) - $(stat -c '%Y' "$CARGO_TARGET_DIR/dependencies-checked"))) -gt 3600 ]]
+#TODO @mark: check all Cargo.toml files instead of only the main one
+#TODO @mark: $ stat: cannot stat '/home/mark/rust_template/target/dependencies-checked': No such file or directory
+#TODO @mark: $ #./build.sh: line 85: 1577531651 - : syntax error: operand expected (error token is "- ")
+if [[ ! -d "$CARGO_TARGET_DIR" ]] ||
+    [[ ! -f "$CARGO_TARGET_DIR/dependencies-checked" ]] ||
+    [[ $(($(date +%s) - $(stat -c '%Y' "$CARGO_TARGET_DIR/dependencies-checked"))) -gt 3600 ]] ||
+    [[ $(($(stat -c '%Y' "Cargo.toml") - $(stat -c '%Y' "$CARGO_TARGET_DIR/dependencies-checked"))) -gt 0 ]]
 then
     showrun cargo audit --deny-warnings
     showrun cargo outdated --exit-code 1
     showrun cargo deny check licenses
     showrun cargo deny check advisories
-    showrun cargo deny check bans
+    showrun cargo deny check bans  # mostly for checking duplicates
     if [[ -d "$CARGO_TARGET_DIR" ]]; then touch "$CARGO_TARGET_DIR/dependencies-checked"; fi
 else
     printf "Skipping dependency checks, because they were already done within the last hour\n"
@@ -99,22 +116,30 @@ then
     showrun cargo fix --clippy --workspace --all-targets --all-features -Z unstable-options
 fi
 
-# Clean already-compiled code for current project(s)
-find . -maxdepth 3 -type f -name Cargo.toml | xargs grep '^\s*name\s*=\s*"' | sed -E 's/\s*name\s*=\s*"([^"]*)"\s*/\1/' | sort | uniq | xargs -I'{}' -- bash -c 'echo cargo clean -p {}; cargo clean -p {}'
+# Build (to test, and prepare for tests).
+#TODO @mark: can this fail on warnings?
+clean_own_code_targets
+showrun cargo build --workspace
 
 # Check formatting.
+clean_own_code_targets
 showrun cargo fmt -- --check
 
 # Check suspicious patterns.
-showrun cargo clippy --workspace --all-targets --all-features -- -D warnings
-
-# Build (to test, and prepare for tests).
-#TODO @mark: can this fail on warnings?
-showrun cargo build --workspace
+showrun cargo clippy --workspace --all-targets --all-features --tests -- -D warnings
 
 # Run all the tests.
-#TODO @mark: can this fail on warnings?
+# The flags are needed to get reliable coverage results
+#TODO @mark: I only want these flags for own code, otherwise all dependencies have to be recompiled
+#showrun export RUSTFLAGS="'-Zincremental=0 -Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads'"  #TODO @mark: error: unknown debugging option: `no-landing-pads'`
+export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads"
+printf ">> export RUSTFLAGS=%s\n" "$RUSTFLAGS"
+showrun export CARGO_INCREMENTAL=1
+#if [[ -n "$RUSTFLAGS" ]]; then cov_flags="$RUSTFLAGS $cov_flags"; fi  #TODO @mark: don't ignore existing RUSTFLAGS
 showrun cargo test --workspace
+showrun export RUSTFLAGS=""  #TODO @mark: don't ignore existing RUSTFLAGS
+#TODO @mark: extract
+#TODO @mark: can this fail on warnings?
 
 # Do not run benchmarks as it is too slow to do every time.
 
@@ -125,7 +150,6 @@ showrun cargo doc --all-features
 mkdir -p -m 700 "$CARGO_TARGET_DIR/report"
 cargo tree > "$CARGO_TARGET_DIR/report/dependencies.txt"
 
-
 if [[ $* == *--fix* ]] && [[ -n "$(git status --porcelain)" ]]
 then
     printf "Automatic changes were made, do not forget to commit them!\n"
@@ -135,3 +159,6 @@ fi
 #TODO @mark: create a --release artifact?
 #TODO @mark: code coverage?
 #TODO @mark: PGO?
+#TODO @mark: create debian packages using cargo-deb ?
+
+

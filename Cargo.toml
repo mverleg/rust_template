@@ -38,6 +38,7 @@ lto = true
 # always compile dependencies in optimized mode
 [profile.dev.package."*"]
 opt-level = 3
+debug = false
 
 #TODO for web, use opt-level 'z'
 
