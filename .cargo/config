@@ -1,12 +1,28 @@
 
 [build]
-# Compile for native architecture
+# Using 'sccache' is recommended, but should be chosen by the user, not the project
+#rustc-wrapper = "sccache"
+
 rustflags = [
-    # optimize for current CPU
-	"-C",
-	"target-cpu=native",
-	# strip symbols from build
-	#TODO @mark: should be only for release mode?
-	"-C",
-	"link-arg=-s",
+    # Optimize for current CPU.
+	"-C", "target-cpu=native",
+]
+
+#[profile.dev]
+
+[profile.release]
+rustflags = [
+	# Strip symbols from build.
+	"-C", "link-arg=-s",
+]
+
+[profile.test_coverage]
+rustflags = [
+    # These flags are to collect coverage information
+	"-Zprofile",
+	"-Ccodegen-units=1",
+	"-Cinline-threshold=0",
+	"-Clink-dead-code",
+	"-Coverflow-checks=off",
+	"-Zno-landing-pads",
 ]

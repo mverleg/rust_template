@@ -1,4 +1,5 @@
-cargo-features = ["profile-overrides"]
+# profile-overrides is kept for now (dec 2019) despite warnings, because there seems to be a difference between nightly and stable
+cargo-features = ["named-profiles", "profile-overrides"]
 
 [package]
 name = "my_new_project"
@@ -6,6 +7,7 @@ version = "0.1.0"
 authors = ["Mark <mverleg.noreply@gmail.com>"]
 edition = "2018"
 
+#TODO @mark: switch to metabuild: https://doc.rust-lang.org/cargo/reference/unstable.html#metabuild
 build = "build/build.rs"
 include = ["src/**/*", "Cargo.toml", "LICENSE.txt", "README.rst"]
 
@@ -31,19 +33,30 @@ required-features = []
 opt-level = 0
 #lto = true
 
-[profile.release]
-opt-level = 3
-lto = true
-
 # always compile dependencies in optimized mode
 [profile.dev.package."*"]
 opt-level = 3
 debug = false
 
+[profile.release]
+opt-level = 3
+codegen-units = 1  # slower but more extensive version of (thin)lto
+lto = true
+
+[profile.test_coverage]
+incremental = false
+inherits = "dev"
+debug = false
+
+[profile.test_coverage.package."*"]
+opt-level = 3
+
 #TODO for web, use opt-level 'z'
 
 [dependencies]
 # Utilities
+log = "^0.4.8"
+pretty_env_logger = "^0.3.1"
 mio = "^0.7.0-alpha.1"
 rand = "^0.7.2"
 rand_xorshift = "^0.2.0"  # non-cryptographic

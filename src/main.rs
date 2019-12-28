@@ -4,10 +4,13 @@ extern crate openblas_src;
 mod dependencies;
 mod launch;
 
-use launch::settings::Settings;
-use launch::setup;
+use crate::launch::settings::Settings;
+use crate::launch::setup;
+
+use ::pretty_env_logger;
 
 pub fn main() {
+    pretty_env_logger::init();
     println!("built with {}", env!("VCS_SUMMARY"));
     // Read configuration from files and environment.
     let settings = Settings::new();
