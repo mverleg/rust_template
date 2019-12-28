@@ -10,19 +10,21 @@ rustflags = [
 
 #[profile.dev]
 
-[profile.release]
-rustflags = [
-	# Strip symbols from build.
-	"-C", "link-arg=-s",
-]
+#[profile.release]
+#rustflags = [
+#	# Strip symbols from build.
+#	"-C", "link-arg=-s",
+#]
 
-[profile.test_coverage]
-rustflags = [
-    # These flags are to collect coverage information
-	"-Zprofile",
-	"-Ccodegen-units=1",
-	"-Cinline-threshold=0",
-	"-Clink-dead-code",
-	"-Coverflow-checks=off",
-	"-Zno-landing-pads",
-]
+#TODO @mark: would be useful to use these flags, but fails for now
+#TODO @mark: https://doc.rust-lang.org/1.28.0/cargo/reference/unstable.html#config-profiles
+#[profile.test_coverage]
+#rustflags = [
+#    # These flags are to collect coverage information
+#	"-Zprofile",
+#	"-Ccodegen-units=1",
+#	"-Cinline-threshold=0",
+#	"-Clink-dead-code",
+#	"-Coverflow-checks=off",
+#	"-Zno-landing-pads",
+#]
