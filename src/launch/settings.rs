@@ -17,7 +17,7 @@ use super::CRATE_NAME;
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub run_mode: String,
-    pub log_level: String,  // log::Level
+    pub log_level: String,     // log::Level
     pub friendly_panics: bool, //TODO @mark: replace by log level ^
 }
 

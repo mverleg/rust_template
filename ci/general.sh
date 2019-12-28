@@ -58,9 +58,13 @@ then
         if [[ -n "$(git status --porcelain)" ]]
     then
         printf "Refusing to apply automatic fixes, because git reports that there are pending changes\n" 1>&2
+        print "(to override, use --force-fix instead)\n" 1>&2
         git status --short
         exit 1
     fi
+elif [[ $* == *--force-fix* ]]
+then
+    DO_FIX=true
 fi
 
 # Create directory to store reports.

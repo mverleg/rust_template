@@ -15,7 +15,8 @@ fi
 # Apply automatic fixes.
 if [[ "$DO_FIX" = true ]]
 then
-    showrun cargo $CARGO_FLAGS fix --clippy --workspace --all-targets --all-features
+    # Use '--allow-dirty' because this is already checked in general.sh (combine fmt and fix).
+    showrun cargo $CARGO_FLAGS fix --clippy --workspace --all-targets --all-features --allow-dirty --allow-staged
 fi
 
 # Check code patterns.

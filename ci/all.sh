@@ -7,6 +7,7 @@ source "$d/build_dependencies.sh"
 source "$d/build_debug.sh"
 source "$d/check_style.sh"
 source "$d/check_lint.sh"
+source "$d/check_tests.sh"
 source "$d/build_docs.sh"
 
 if [[ "$DO_FIX" = true ]] && [[ -n "$(git status --porcelain)" ]]

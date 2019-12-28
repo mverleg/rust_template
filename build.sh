@@ -12,7 +12,7 @@
 #printf ">> export RUSTFLAGS=%s\n" "$RUSTFLAGS"
 #showrun export CARGO_INCREMENTAL=1
 #if [[ -n "$RUSTFLAGS" ]]; then cov_flags="$RUSTFLAGS $cov_flags"; fi  #TODO @mark: don't ignore existing RUSTFLAGS
-RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads" showrun cargo $CARGO_FLAGS test --profile test_coverage --workspace
+
 #showrun export RUSTFLAGS=""  #TODO @mark: don't ignore existing RUSTFLAGS
 #TODO @mark: extract
 #TODO @mark: can this fail on warnings?
