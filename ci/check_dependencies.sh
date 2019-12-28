@@ -38,7 +38,8 @@ then
     find . -maxdepth 5 -type f -name 'Cargo.toml' -print0 |
     while IFS= read -r -d '' cargo_file
     do
-        if [[ $(($(stat -c '%Y' "$cargo_file") - $(stat -c '%Y' "$CARGO_TARGET_DIR/dependencies-checked"))) -gt 0 ]]
+        if [[ ! -f "$CARGO_TARGET_DIR/dependencies-checked" ]] ||
+            [[ $(($(stat -c '%Y' "$cargo_file") - $(stat -c '%Y' "$CARGO_TARGET_DIR/dependencies-checked"))) -gt 0 ]]
         then
 
             # Run various checks on the dependencies.

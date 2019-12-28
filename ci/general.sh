@@ -2,7 +2,6 @@
 
 ##
 ## General setup that should be imported by each step.
-## Should be idempotent.
 ##
 
 # If your version of Rust does not support clippy or another component, check which version does at
@@ -21,10 +20,12 @@ set -u  # undefined variables are errors
 
 function showrun() {
     echo ">> $@"
-    if ! "$@"
+    "$@"
+    exit_status="$?"
+    if [[ "$exit_status" -ne "0" ]]
     then
         printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***\n" "'$*'" 1>&2
-        exit $?
+        exit $exit_status
     fi
 }
 
