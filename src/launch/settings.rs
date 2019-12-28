@@ -7,7 +7,7 @@ use directories::ProjectDirs;
 use dotenv;
 use serde::Deserialize;
 
-use ::log;
+//use ::log;
 
 use super::CRATE_NAME;
 

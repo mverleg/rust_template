@@ -16,6 +16,8 @@ function clean_own_code_targets() {
         xargs -I'{}' -- bash -c 'echo cargo clean -p {}; cargo clean -p {}'
 }
 
+export CARGOFLAGS="-Z unstable-options -Z config-profile"
+
 if [[ ! -f "Cargo.toml" ]]
 then
     printf "'Cargo.toml' not found, this is not the project directory?\n" 1>&2
@@ -53,27 +55,27 @@ then
 fi
 if ! hash cargo-build-deps 2>/dev/null
 then
-    showrun cargo install cargo-build-deps
+    showrun cargo $CARGOFLAGS install cargo-build-deps
 fi
 if ! hash cargo-tree 2>/dev/null
 then
-    showrun cargo install cargo-tree
+    showrun cargo $CARGOFLAGS install cargo-tree
 fi
 if ! hash cargo-audit 2>/dev/null
 then
-    showrun cargo install cargo-audit
+    showrun cargo $CARGOFLAGS install cargo-audit
 fi
 if ! hash cargo-outdated 2>/dev/null
 then
-    showrun cargo install --force --git https://github.com/kbknapp/cargo-outdated
+    showrun cargo $CARGOFLAGS install --force --git https://github.com/kbknapp/cargo-outdated
 fi
 if ! hash cargo-deny 2>/dev/null
 then
-    showrun cargo install cargo-deny
+    showrun cargo $CARGOFLAGS install cargo-deny
 fi
 if ! hash grcov 2>/dev/null
 then
-    showrun cargo install grcov
+    showrun cargo $CARGOFLAGS install grcov
 fi
 
 # Check the dependency versions.
@@ -86,18 +88,18 @@ if [[ ! -d "$CARGO_TARGET_DIR" ]] ||
     [[ $(($(date +%s) - $(stat -c '%Y' "$CARGO_TARGET_DIR/dependencies-checked"))) -gt 3600 ]] ||
     [[ $(($(stat -c '%Y' "Cargo.toml") - $(stat -c '%Y' "$CARGO_TARGET_DIR/dependencies-checked"))) -gt 0 ]]
 then
-    showrun cargo audit --deny-warnings
-    showrun cargo outdated --exit-code 1
-    showrun cargo deny check licenses
-    showrun cargo deny check advisories
-    showrun cargo deny check bans  # mostly for checking duplicates
+    showrun cargo $CARGOFLAGS audit --deny-warnings
+    showrun cargo $CARGOFLAGS outdated --exit-code 1
+    showrun cargo $CARGOFLAGS deny check licenses
+    showrun cargo $CARGOFLAGS deny check advisories
+    showrun cargo $CARGOFLAGS deny check bans  # mostly for checking duplicates
     if [[ -d "$CARGO_TARGET_DIR" ]]; then touch "$CARGO_TARGET_DIR/dependencies-checked"; fi
 else
     printf "Skipping dependency checks, because they were already done within the last hour\n"
 fi
 
 # Build dependencies, as they shouldn't affect clippy etc.
-#showrun cargo build-deps --release 1>/dev/null
+#showrun cargo $CARGOFLAGS build-deps --release 1>/dev/null
 
 # Fix formatting and compiler warnings, if --fix is given
 if [[ $* == *--fix* ]]
@@ -110,45 +112,45 @@ then
     printf "Applying compiler suggestions and rustfmt fixes\n"
     if ! hash cargo-fix 2>/dev/null
     then
-        showrun cargo install cargo-fix
+        showrun cargo $CARGOFLAGS install cargo-fix
     fi
-    showrun cargo fmt
-    showrun cargo fix --clippy --workspace --all-targets --all-features -Z unstable-options
+    showrun cargo $CARGOFLAGS fmt
+    showrun cargo $CARGOFLAGS fix --clippy --workspace --all-targets --all-features -Z unstable-options
 fi
 
 # Build (to test, and prepare for tests).
 #TODO @mark: can this fail on warnings?
 clean_own_code_targets
-showrun cargo build --workspace
+showrun cargo $CARGOFLAGS build --workspace
 
 # Check formatting.
 clean_own_code_targets
-showrun cargo fmt -- --check
+showrun cargo $CARGOFLAGS fmt -- --check
 
 # Check suspicious patterns.
-showrun cargo clippy --workspace --all-targets --all-features --tests -- -D warnings
+showrun cargo $CARGOFLAGS clippy --workspace --all-targets --all-features --tests -- -D warnings
 
 # Run all the tests.
 # The flags are needed to get reliable coverage results
 #TODO @mark: I only want these flags for own code, otherwise all dependencies have to be recompiled
 #showrun export RUSTFLAGS="'-Zincremental=0 -Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads'"  #TODO @mark: error: unknown debugging option: `no-landing-pads'`
-export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads"
-printf ">> export RUSTFLAGS=%s\n" "$RUSTFLAGS"
-showrun export CARGO_INCREMENTAL=1
+#export RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads"
+#printf ">> export RUSTFLAGS=%s\n" "$RUSTFLAGS"
+#showrun export CARGO_INCREMENTAL=1
 #if [[ -n "$RUSTFLAGS" ]]; then cov_flags="$RUSTFLAGS $cov_flags"; fi  #TODO @mark: don't ignore existing RUSTFLAGS
-showrun cargo test --profile test_coverage --workspace
-showrun export RUSTFLAGS=""  #TODO @mark: don't ignore existing RUSTFLAGS
+RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads" showrun cargo $CARGOFLAGS test --profile test_coverage --workspace
+#showrun export RUSTFLAGS=""  #TODO @mark: don't ignore existing RUSTFLAGS
 #TODO @mark: extract
 #TODO @mark: can this fail on warnings?
 
 # Do not run benchmarks as it is too slow to do every time.
 
 # Try to build the documentation.
-showrun cargo doc --all-features
+showrun cargo $CARGOFLAGS doc --all-features
 
 # Export some information
 mkdir -p -m 700 "$CARGO_TARGET_DIR/report"
-cargo tree > "$CARGO_TARGET_DIR/report/dependencies.txt"
+cargo $CARGOFLAGS tree > "$CARGO_TARGET_DIR/report/dependencies.txt"
 
 if [[ $* == *--fix* ]] && [[ -n "$(git status --porcelain)" ]]
 then
