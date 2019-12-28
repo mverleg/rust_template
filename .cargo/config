@@ -2,7 +2,11 @@
 [build]
 # Compile for native architecture
 rustflags = [
+    # optimize for current CPU
 	"-C",
-	"target-cpu=native"
+	"target-cpu=native",
+	# strip symbols from build
+	#TODO @mark: should be only for release mode?
+	"-C",
+	"link-arg=-s",
 ]
-

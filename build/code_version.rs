@@ -13,7 +13,7 @@ pub fn extract_git_summary() -> String {
         .map(|ln| ln.chars().skip(3).collect::<String>().trim().to_owned())
         .collect::<Vec<_>>()
         .join("+");
-    format!("git+{}+uncommitted_changed+{}", hash, postfix)
+    format!("git+{}+uncommitted_changes+{}", hash, postfix)
 }
 
 fn git_command_output(git_args: &[&str], git_description: &str) -> String {
