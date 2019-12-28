@@ -9,6 +9,17 @@ function showrun() {
     fi
 }
 
+if [[ ! -f "Cargo.toml" ]]
+then
+    printf "'Cargo.toml' not found, this is not the project directory?\n" 1>&2
+    exit 1
+fi
+
+if [[ -z "$CARGO_TARGET_DIR" ]]
+then
+    export CARGO_TARGET_DIR="$(pwd)/target"
+fi
+
 # Note that these sets are inside the bash invoked above, so only for this script.
 set -e  # fail if a command fails
 set -E  # technical change so traps work with -E
@@ -37,6 +48,10 @@ if ! hash cargo-build-deps 2>/dev/null
 then
     showrun cargo install cargo-build-deps
 fi
+if ! hash cargo-tree 2>/dev/null
+then
+    showrun cargo install cargo-tree
+fi
 if ! hash cargo-audit 2>/dev/null
 then
     showrun cargo install cargo-audit
@@ -45,14 +60,21 @@ if ! hash cargo-outdated 2>/dev/null
 then
     showrun cargo install --force --git https://github.com/kbknapp/cargo-outdated
 fi
+if ! hash cargo-deny 2>/dev/null
+then
+    showrun cargo install cargo-deny
+fi
 
 # Check the dependency versions.
 # Note that things can still get outdated *after* release.
-if [[ ! -d "target" ]] || [[ ! -f "target/dependencies-checked" ]] || [[ $(($(date +%s) - $(stat -c '%Y' "target/dependencies-checked"))) -gt 3600 ]]
+if [[ ! -d "$CARGO_TARGET_DIR" ]] || [[ ! -f "$CARGO_TARGET_DIR/dependencies-checked" ]] || [[ $(($(date +%s) - $(stat -c '%Y' "$CARGO_TARGET_DIR/dependencies-checked"))) -gt 3600 ]]
 then
     showrun cargo audit --deny-warnings
     showrun cargo outdated --exit-code 1
-    if [[ -d "target" ]]; then touch "target/dependencies-checked"; fi
+    showrun cargo deny check licenses
+    showrun cargo deny check advisories
+    showrun cargo deny check bans
+    if [[ -d "$CARGO_TARGET_DIR" ]]; then touch "$CARGO_TARGET_DIR/dependencies-checked"; fi
 else
     printf "Skipping dependency checks, because they were already done within the last hour\n"
 fi
@@ -98,6 +120,11 @@ showrun cargo test --workspace
 
 # Try to build the documentation.
 showrun cargo doc --all-features
+
+# Export some information
+mkdir -p -m 700 "$CARGO_TARGET_DIR/report"
+cargo tree > "$CARGO_TARGET_DIR/report/dependencies.txt"
+
 
 if [[ $* == *--fix* ]] && [[ -n "$(git status --porcelain)" ]]
 then

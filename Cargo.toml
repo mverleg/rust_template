@@ -1,3 +1,4 @@
+cargo-features = ["profile-overrides"]
 
 [package]
 name = "my_new_project"
