@@ -5,6 +5,14 @@
 ## Should be idempotent.
 ##
 
+# If your version of Rust does not support clippy or another component, check which version does at
+# https://rust-lang.github.io/rustup-components-history/index.html
+# then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
+
+# Start C-style header guard (because who doesn't miss those?!).
+if [[ -z "${IS_GENERAL_HEADER_INCLUDED:-}" ]]
+then
+
 # Note that these sets are inside the bash invoked above, so only for this script.
 set -e  # fail if a command fails
 set -E  # technical change so traps work with -E
@@ -21,13 +29,14 @@ function showrun() {
 }
 
 function clean_own_code_targets() {
-    find . -maxdepth 3 -type f -name Cargo.toml | xargs grep '^\s*name\s*=\s*"' |
+    find . -maxdepth 5 -type f -name 'Cargo.toml' |
+        xargs grep '^\s*name\s*=\s*"' |
         sed -E 's/\s*name\s*=\s*"([^"]*)"\s*/\1/' |
         sort | uniq |
-        xargs -I'{}' -- bash -c 'echo cargo clean -p {}; cargo clean -p {}'
+        xargs -I"{}" bash -c 'printf "cargo clean -p {}\n"; cargo clean -p {}'
 }
 
-export CARGOFLAGS="-Z unstable-options -Z config-profile"
+export CARGO_FLAGS="-Z unstable-options -Z config-profile"
 
 if [[ ! -f "Cargo.toml" ]]
 then
@@ -35,17 +44,28 @@ then
     exit 1
 fi
 
+# Set target dir, if not set, so commands can use it.
 if [[ -z "${CARGO_TARGET_DIR:-}" ]]
 then
     export CARGO_TARGET_DIR="$(pwd)/target"
 fi
 
-# Create report directory
-mkdir -p -m 700 "$CARGO_TARGET_DIR/report"
+# Check if automatic fixes should be applied.
+DO_FIX=false
+if [[ $* == *--fix* ]]
+then
+    DO_FIX=true
+        if [[ -n "$(git status --porcelain)" ]]
+    then
+        printf "Refusing to apply automatic fixes, because git reports that there are pending changes\n" 1>&2
+        git status --short
+        exit 1
+    fi
+fi
 
-# If your version of Rust does not support clippy or another component, check which version does at
-# https://rust-lang.github.io/rustup-components-history/index.html
-# then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
+# Create directory to store reports.
+REPORT_DIR="$CARGO_TARGET_DIR/report"
+mkdir -p -m 700 "$REPORT_DIR"
 
 if ! hash sccache 2>/dev/null
 then
@@ -53,15 +73,11 @@ then
 fi
 
 # Add components.
-if ! rustup component list | grep -q rustfmt
-then
-    showrun rustup component add rustfmt
-fi
-if ! rustup component list | grep -q clippy
-then
-    showrun rustup component add clippy
-fi
 if ! hash grcov 2>/dev/null
 then
-    showrun cargo $CARGOFLAGS install grcov
+    showrun cargo $CARGO_FLAGS install grcov
+fi
+
+# End of the C-style header guard.
+IS_GENERAL_HEADER_INCLUDED=1
 fi
