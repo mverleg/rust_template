@@ -80,6 +80,5 @@ brotli = "^3.3.0"
 mockstream = "^0.0.3"
 lipsum = "^0.6.0"
 
-
 [build-dependencies]
 configure_me_codegen = "^0.3.12"

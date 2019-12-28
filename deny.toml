@@ -1,0 +1,29 @@
+
+[advisories]
+vulnerability = "deny"
+unmaintained = "deny"
+notice = "deny"
+
+[bans]
+multiple-versions = "deny"
+deny = []
+skip = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-git = []
+
+
+[licenses]
+unlicensed = "deny"
+allow-osi-fsf-free = "both"
+copyleft = "deny"
+# We want really high confidence when inferring licenses from text
+confidence-threshold = 0.93
+allow = [
+    "BSD-2-Clause",  # pretty sure this is OSI approved
+    "CC0-1.0",  # give up copyright
+    "MITNFA",  # MIT + modified versions should remove original bug report contact details
+]
+exceptions = []
