@@ -15,7 +15,7 @@ jobs:
     name: Platform ${{ matrix.os }} ${{ matrix.rust }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]  # macos-latest, windows-latest
         rust: [nightly]  # add stable if supported
     runs-on: ${{ matrix.os }}
     steps:

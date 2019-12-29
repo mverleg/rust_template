@@ -45,6 +45,8 @@ then
         #fname="$(echo "$(basename $executable)" | sed -E 's/(.*)-[^-]+/\1/')"
         showrun cp "$executable" "$binaries_dir/$(basename $executable)-$platform"
     done
+else
+    printf "Use --platform-binaries to produce platform-specific binaries\n"
 fi
 
 printf "✓ building releases ready\n"

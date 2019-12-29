@@ -131,8 +131,6 @@ export DO_PLATFORM_BINARIES=false
 if [[ $* == *--platform-binaries* ]]
 then
     export DO_PLATFORM_BINARIES=true
-else
-    printf "Use --platform-binaries to produce platform-specific binaries\n"
 fi
 
 # Create directory to store reports.
@@ -161,7 +159,7 @@ fi
 if ! hash rustup 2>/dev/null
 then
     #TODO @mark: should be platform dependent
-    showrun apt-get install -y gfortran || true
+    showrun apt-get install -y libgfortran3 gfortran || true
 fi
 
 # Set up the correct Rust version.
