@@ -1,14 +1,14 @@
 
-.. image:: https://github.com/actions/toolkit/workflows/Works/badge.svg
+.. image:: https://github.com/mverleg/rust_template/workflows/Works/badge.svg
     :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/works.yml
 
-.. image:: https://github.com/actions/toolkit/workflows/Polished/badge.svg
+.. image:: https://github.com/mverleg/rust_template/workflows/Polished/badge.svg
     :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/polished.yml
 
-.. image:: https://github.com/actions/toolkit/workflows/Platforms/badge.svg
+.. image:: https://github.com/mverleg/rust_template/workflows/Platforms/badge.svg
     :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/platforms.yml
 
-.. image:: https://github.com/actions/toolkit/workflows/Dependencies/badge.svg
+.. image:: https://github.com/mverleg/rust_template/workflows/Dependencies/badge.svg
     :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/dependencies.yml
 
 .. image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
