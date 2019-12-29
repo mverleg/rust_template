@@ -19,13 +19,12 @@ https://github.com/slog-rs/slog
 https://github.com/Stebalien/tempfile
 https://github.com/japaric/heapless (maybe same tests as generic array)
 
-
-bson or messagepack (or something that works with json schema to save even more)
-bson or messagepack (or something that works with json schema to save even more)
+json-schema + messagepack(serde)
 
 test coverage badge?
-
 
 web (might be outdated):
 stdweb
 webpack
+
+Future/bonus: https://github.com/arrayfire/arrayfire-rust (gpu)

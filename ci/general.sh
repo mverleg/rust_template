@@ -4,19 +4,16 @@
 ## General setup that should be imported by each step.
 ##
 
-# If your version of Rust does not support clippy or another component, check which version does at
-# https://rust-lang.github.io/rustup-components-history/index.html
-# then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
-
-# Start C-style header guard (because who doesn't miss those?!).
-if [[ -z "${IS_GENERAL_HEADER_INCLUDED:-}" ]]
-then
-
 # Note that these sets are inside the bash invoked above, so only for this script.
 set -e  # fail if a command fails
 set -E  # technical change so traps work with -E
 set -o pipefail  # also include intermediate commands in -e
 set -u  # undefined variables are errors
+
+
+# Start C-style header guard (because who doesn't miss those?!).
+if [[ -z "${IS_GENERAL_HEADER_INCLUDED:-}" ]]
+then
 
 export CARGO_FLAGS="-Z unstable-options -Z config-profile"
 
@@ -41,7 +38,9 @@ fi
 
 function showrun() {
     echo ">> $@"
+    set +e
     "$@"
+    set -e
     exit_status="$?"
     if [[ "$exit_status" -ne "0" ]]
     then
@@ -73,6 +72,13 @@ function get_profile_executable() {
     fi
     printf "%s" "$(find "$profile_dir" -maxdepth 1 -type f -executable -print0 | (xargs -r -0 ls -1 -t || test $? -eq 141) | head -1)"
 }
+
+# If your version of Rust does not support clippy or another component, check which version does at
+# https://rust-lang.github.io/rustup-components-history/index.html
+# then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
+
+# Set up the correct git version
+showrun rustup default nightly-2019-12-20
 
 # Check if automatic fixes should be applied.
 DO_FIX=false

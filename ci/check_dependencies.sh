@@ -44,10 +44,10 @@ then
 
             # Run various checks on the dependencies.
             showrun cargo $CARGO_FLAGS audit --deny-warnings
-            showrun cargo $CARGO_FLAGS outdated --exit-code 1
+            #showrun cargo $CARGO_FLAGS outdated --exit-code 1
             showrun cargo $CARGO_FLAGS deny check licenses
             showrun cargo $CARGO_FLAGS deny check advisories
-            showrun cargo $CARGO_FLAGS deny check bans  # mostly for checking duplicates
+            #showrun cargo $CARGO_FLAGS deny check bans  # mostly for checking duplicates
 
             # Disable these checks for a while.
             if [[ -d "$CARGO_TARGET_DIR" ]]
@@ -62,6 +62,11 @@ then
 else
     printf "Skipping dependency checks, because they were already done within the last hour\n"
 fi
+
+# Warnings until these lines can be enabled again in the 'Check crate dependencies' part.
+printf "WARNING: skipping outdated due to https://github.com/kbknapp/cargo-outdated/issues/186\n" 1>&2
+printf "WARNING: multiple dependency versions are warnings but do not fail the build\n" 1>&2
+showrun cargo $CARGO_FLAGS deny check bans || true
 
 # Write information about dependencies.
 cargo $CARGO_FLAGS tree > "$REPORT_DIR/dependencies.txt"
