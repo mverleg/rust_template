@@ -40,11 +40,18 @@ Checklist
 Troubleshooting
 -------------------------------
 
-* If you get an error like this while compiling::
+* Blas error::
 
       undefined reference to `cblas_sgemm'
 
-  then you may need to integrate_ ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
+  You may need to integrate_ ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
+
+* gfortran error::
+
+      = note: /usr/bin/ld: cannot find -lgfortran
+          collect2: error: ld returned 1 exit status
+
+  You may need to install ``gfortran``, or disable ``ndarray``-related dependencies (if you do not need them).
 
 
 .. _integrate: https://github.com/blas-lapack-rs/blas-lapack-rs.github.io/wiki

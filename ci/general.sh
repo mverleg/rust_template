@@ -4,12 +4,6 @@
 ## General setup that should be imported by each step.
 ##
 
-# Note that these sets are inside the bash invoked above, so only for this script.
-set -e  # fail if a command fails
-set -E  # technical change so traps work with -E
-set -o pipefail  # also include intermediate commands in -e
-set -u  # undefined variables are errors
-
 
 # Start C-style header guard (because who doesn't miss those?!).
 # Note these don't work on CI servers sometimes, so content must be idempotent!
@@ -17,6 +11,16 @@ if [[ -z "${IS_GENERAL_HEADER_INCLUDED:-}" ]]
 then
 
 export CARGO_FLAGS="-Z unstable-options -Z config-profile"
+
+##
+## PRE-CONDITIONS AND UTILITIES
+##
+
+# Note that these sets are inside the bash invoked above, so only for this script.
+set -e  # fail if a command fails
+set -E  # technical change so traps work with -E
+set -o pipefail  # also include intermediate commands in -e
+set -u  # undefined variables are errors
 
 if [[ ! -f "Cargo.toml" ]]
 then
@@ -84,6 +88,10 @@ stdout.write("nightly")
 EOF
 }
 
+##
+## ENVIRONMENT AND ARGUMENTS
+##
+
 # If your version of Rust does not support clippy or another component, check which version does at
 # https://rust-lang.github.io/rustup-components-history/index.html
 # then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
@@ -101,11 +109,58 @@ then
     export LD_LIBRARY_PATH=""
 fi
 
+# Check if automatic fixes should be applied.
+export DO_FIX=false
+if [[ $* == *--fix* ]]
+then
+    export DO_FIX=true
+    if [[ -n "$(git status --porcelain)" ]]
+    then
+        printf "Refusing to apply automatic fixes, because git reports that there are pending changes\n" 1>&2
+        print "(to override, use --force-fix instead)\n" 1>&2
+        git status --short
+        exit 1
+    fi
+elif [[ $* == *--force-fix* ]]
+then
+    export DO_FIX=true
+fi
+
+# Check if platform binaries should be made.
+export DO_PLATFORM_BINARIES=false
+if [[ $* == *--platform-binaries* ]]
+then
+    export DO_PLATFORM_BINARIES=true
+else
+    printf "Use --platform-binaries to produce platform-specific binaries\n"
+fi
+
+# Create directory to store reports.
+export REPORT_DIR="$CARGO_TARGET_DIR/report"
+mkdir -p -m 700 "$REPORT_DIR"
+
+##
+## TOOLCHAIN SETUP
+##
+
+# hash sccache 2>/dev/null
+if [[ -z "${RUSTC_WRAPPER:-}" ]] || [[ "$RUSTC_WRAPPER" != "sccache" ]]
+then
+    printf "Not using sccache (using sccache is recommended: https://github.com/mozilla/sccache)\n" 1>&2
+fi
+
 # Install 'rustup' if not installed.
 if ! hash rustup 2>/dev/null
 then
     printf "rustup was not installed!\n" 1>&2
     showrun bash -c 'curl https://sh.rustup.rs -sSf | sh -s -- -y'
+fi
+
+# Install 'gfortran' if not installed.
+if ! hash rustup 2>/dev/null
+then
+    #TODO @mark: should be platform dependent
+    showrun apt-get install -y gfortran || true
 fi
 
 # Set up the correct Rust version.
@@ -138,47 +193,11 @@ else
     showrun rustup default "$RUST_VERSION"
 fi
 
-# Check if automatic fixes should be applied.
-DO_FIX=false
-if [[ $* == *--fix* ]]
-then
-    DO_FIX=true
-    if [[ -n "$(git status --porcelain)" ]]
-    then
-        printf "Refusing to apply automatic fixes, because git reports that there are pending changes\n" 1>&2
-        print "(to override, use --force-fix instead)\n" 1>&2
-        git status --short
-        exit 1
-    fi
-elif [[ $* == *--force-fix* ]]
-then
-    DO_FIX=true
-fi
-
-# Check if platform binaries should be made.
-DO_PLATFORM_BINARIES=false
-if [[ $* == *--platform-binaries* ]]
-then
-    DO_PLATFORM_BINARIES=true
-else
-    printf "Use --platform-binaries to produce platform-specific binaries\n"
-fi
-
-# Create directory to store reports.
-REPORT_DIR="$CARGO_TARGET_DIR/report"
-mkdir -p -m 700 "$REPORT_DIR"
-
-# hash sccache 2>/dev/null
-if [[ -z "${RUSTC_WRAPPER:-}" ]] || [[ "$RUSTC_WRAPPER" != "sccache" ]]
-then
-    printf "Not using sccache (using sccache is recommended: https://github.com/mozilla/sccache)\n" 1>&2
-fi
-
 # Add components.
-if ! hash grcov 2>/dev/null
-then
-    showrun cargo $CARGO_FLAGS install grcov
-fi
+#if ! hash grcov 2>/dev/null
+#then
+#    showrun cargo $CARGO_FLAGS install grcov
+#fi
 
 # End of the C-style header guard.
 IS_GENERAL_HEADER_INCLUDED=1
