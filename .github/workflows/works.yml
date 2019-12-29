@@ -6,7 +6,6 @@
 name: Works
 on:
   push:
-  pull_request:  #TODO @mark: is this already captured in 'push'?
   release:
     types:
       - created
