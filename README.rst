@@ -1,14 +1,18 @@
-.. image:: https://travis-ci.org/mverleg/rust_template.svg?branch=master
-    :target: https://travis-ci.org/mverleg/rust_template
 
-.. image:: https://deps.rs/repo/github/mverleg/rust_template/status.svg
-    :target: https://deps.rs/repo/github/mverleg/rust_template
+.. image:: https://github.com/actions/toolkit/workflows/Works/badge.svg
+    :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/works.yml
+
+.. image:: https://github.com/actions/toolkit/workflows/Polished/badge.svg
+    :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/polished.yml
+
+.. image:: https://github.com/actions/toolkit/workflows/Platforms/badge.svg
+    :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/platforms.yml
+
+.. image:: https://github.com/actions/toolkit/workflows/Dependencies/badge.svg
+    :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/dependencies.yml
 
 .. image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
     :target: https://opensource.org/licenses/BSD-3-Clause
-
-
-
 
 Rust template project
 ===============================

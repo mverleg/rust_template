@@ -3,7 +3,7 @@
 ## Dependencies are up to date and do not conflict.
 ## Dependencies need to be checked regularly, they can also go out of date if there are no commits.
 ##
-name: Dependencies -
+name: Dependencies
 on:
   schedule:
     - cron: '0 17 * * 6'

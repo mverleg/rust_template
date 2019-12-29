@@ -62,6 +62,7 @@ function get_profile_executable() {
 
 function determine_clippy_fmt_nightly() {
     # Find a nightly version that has clippy and rustfmt, if there is one in the last week.
+    #TODO @mark: needs more testing - right now there's no clippy-compatible version
     python << EOF
 from requests import get
 from sys import stdout
