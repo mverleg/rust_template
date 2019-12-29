@@ -23,19 +23,6 @@ then
     exit 1
 fi
 
-# Set target dir, if not set, so commands can use it.
-if [[ -z "${CARGO_TARGET_DIR:-}" ]]
-then
-    export CARGO_TARGET_DIR="$(pwd)/target"
-    mkdir -p -m 700 "$CARGO_TARGET_DIR"
-fi
-
-# Make sure library path exists, so -u doesn't crash it
-if [[ -z "${LD_LIBRARY_PATH:-}" ]]
-then
-    export LD_LIBRARY_PATH=""
-fi
-
 function showrun() {
     echo ">> $@"
     set +e
@@ -77,8 +64,31 @@ function get_profile_executable() {
 # https://rust-lang.github.io/rustup-components-history/index.html
 # then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
 
+# Set target dir, if not set, so commands can use it.
+if [[ -z "${CARGO_TARGET_DIR:-}" ]]
+then
+    export CARGO_TARGET_DIR="$(pwd)/target"
+    mkdir -p -m 700 "$CARGO_TARGET_DIR"
+fi
+
+# Make sure library path exists, so -u doesn't crash it
+if [[ -z "${LD_LIBRARY_PATH:-}" ]]
+then
+    export LD_LIBRARY_PATH=""
+fi
+
+curl https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/clippy.json
+curl https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/rustfmt.json
+
 # Set up the correct git version
-showrun rustup default nightly-2019-12-20
+if [[ -z "${RUST_VERSION:-}" ]]
+then
+    export RUST_VERSION="nightly-2019-12-20"
+    printf "No specific Rust version requested, falling back to %s\n" "$RUST_VERSION"
+else
+    printf "Rust version requested: %s\n" "$RUST_VERSION"
+fi
+showrun rustup default "$RUST_VERSION"
 
 # Check if automatic fixes should be applied.
 DO_FIX=false

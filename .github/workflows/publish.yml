@@ -1,8 +1,15 @@
 
 # These steps create a release, including for example binaries, images, reports, ...
-# For this to be run, 'works.yaml' and 'polished.yaml' should have run, and reviews & manual tests should have completed.
+# For this to be run, 'works.yml' and 'polished.yml' should have run, and reviews & manual tests should have completed.
 name: Release - for code (presumably in 'master'), create a release.
-on: [push]
 
 jobs:
-#TODO
+  polished:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build release binaries
+        run: |
+          ci/build_release.sh
