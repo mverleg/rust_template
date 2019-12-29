@@ -1,5 +1,5 @@
 # profile-overrides is kept for now (dec 2019) despite warnings, because there seems to be a difference between nightly and stable
-cargo-features = ["named-profiles", "profile-overrides"]
+cargo-features = ["named-profiles"]
 
 [package]
 name = "my_new_project"
@@ -44,8 +44,8 @@ codegen-units = 1  # slower but more extensive version of (thin)lto
 lto = true
 
 [profile.test_coverage]
-incremental = false
 inherits = "dev"
+incremental = false
 debug = false
 
 [profile.test_coverage.package."*"]

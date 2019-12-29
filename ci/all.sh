@@ -14,3 +14,8 @@ if [[ "$DO_FIX" = true ]] && [[ -n "$(git status --porcelain)" ]]
 then
     printf "Automatic changes were made, do not forget to commit them!\n"
 fi
+
+#TODO @mark: create a --release artifact?
+#TODO @mark: PGO?
+#TODO @mark: create debian packages using cargo-deb ?
+

@@ -6,4 +6,4 @@
 
 source "${BASH_SOURCE%/*}/general.sh"
 
-showrun cargo $CARGO_FLAGS doc --all-features
+showrun cargo $CARGO_FLAGS doc --no-deps --all-features

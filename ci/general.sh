@@ -49,6 +49,13 @@ fi
 if [[ -z "${CARGO_TARGET_DIR:-}" ]]
 then
     export CARGO_TARGET_DIR="$(pwd)/target"
+    mkdir -p -m 700 "$CARGO_TARGET_DIR"
+fi
+
+# Make sure library path exists, so -u doesn't crash it
+if [[ -z "${LD_LIBRARY_PATH:-}" ]]
+then
+    export LD_LIBRARY_PATH=""
 fi
 
 # Check if automatic fixes should be applied.
