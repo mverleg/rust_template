@@ -28,8 +28,9 @@ function showrun() {
     echo ">> $@"
     set +e
     "$@"
-    set -e
     exit_status="$?"
+    set -e
+    echo "exit_status = $exit_status"  #TODO @mark: TEMPORARY! REMOVE THIS!
     if [[ "$exit_status" -ne "0" ]]
     then
         printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***\n" "'$*'" 1>&2
