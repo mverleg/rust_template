@@ -101,6 +101,13 @@ then
     export LD_LIBRARY_PATH=""
 fi
 
+# Install 'rustup' if not installed.
+if ! hash rustup 2>/dev/null
+then
+    printf "rustup was not installed!\n" 1>&2
+    showrun bash -c 'curl https://sh.rustup.rs -sSf | sh -s -- -y'
+fi
+
 # Set up the correct Rust version.
 export ORIGINAL_RUST_VERSION="$(rustup show active-toolchain | cut -d ' ' -f1)"
 function _revert_rust() {
