@@ -154,6 +154,7 @@ if ! hash rustup 2>/dev/null
 then
     printf "rustup was not installed!\n" 1>&2
     showrun bash -c 'curl https://sh.rustup.rs -sSf | sh -s -- -y'
+    export PATH="$HOME/.cargo/bin:$PATH"
 fi
 
 # Install 'gfortran' if not installed.

@@ -25,5 +25,4 @@ jobs:
         env:
           RUST_VERSION: ${{ matrix.rust }}
         run: |
-          printf "RUST_VERSION = %s\n" "$RUST_VERSION"
           ci/check_tests.sh
