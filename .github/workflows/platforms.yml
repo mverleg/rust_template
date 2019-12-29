@@ -9,7 +9,7 @@ on:
 
 jobs:
   platform_support:
-    name: Platform support
+    name: Platform ${{ matrix.os }} ${{ matrix.rust }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]

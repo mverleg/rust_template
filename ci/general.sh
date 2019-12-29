@@ -60,6 +60,27 @@ function get_profile_executable() {
     printf "%s" "$(find "$profile_dir" -maxdepth 1 -type f -executable -print0 | (xargs -r -0 ls -1 -t || test $? -eq 141) | head -1)"
 }
 
+function determine_clippy_fmt_nightly() {
+    # Find a nightly version that has clippy and rustfmt, if there is one in the last week.
+    python << EOF
+from requests import get
+from sys import stdout
+libs = tuple([
+    get(url="https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/clippy.json").json(),
+    get(url="https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/rustfmt.json").json() ])
+for date in sorted(libs[0].keys(), reverse=True):
+    for lib in libs:
+        if lib[date] is not True:
+            break
+    else:
+        # date for all libs valid
+        stdout.write(date)
+        break
+# no supported version; choose general nightly, which'll probably fail...
+stdout.write("nightly")
+EOF
+}
+
 # If your version of Rust does not support clippy or another component, check which version does at
 # https://rust-lang.github.io/rustup-components-history/index.html
 # then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
@@ -77,16 +98,17 @@ then
     export LD_LIBRARY_PATH=""
 fi
 
-curl https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/clippy.json
-curl https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/rustfmt.json
-
 # Set up the correct git version
 if [[ -z "${RUST_VERSION:-}" ]]
 then
-    export RUST_VERSION="nightly-2019-12-20"
+    export RUST_VERSION="$(determine_clippy_fmt_nightly)"
     printf "No specific Rust version requested, falling back to %s\n" "$RUST_VERSION"
+elif [[ "$RUST_VERSION" == "nightly" ]]
+then
+    export RUST_VERSION="$(determine_clippy_fmt_nightly)"
+    printf "Requested nightly, chose %s in an attempt to support rustfmt and clippy\n" "$RUST_VERSION"
 else
-    printf "Rust version requested: %s\n" "$RUST_VERSION"
+    printf "Specific Rust version requested: %s\n" "$RUST_VERSION"
 fi
 showrun rustup default "$RUST_VERSION"
 
@@ -95,7 +117,7 @@ DO_FIX=false
 if [[ $* == *--fix* ]]
 then
     DO_FIX=true
-        if [[ -n "$(git status --porcelain)" ]]
+    if [[ -n "$(git status --porcelain)" ]]
     then
         printf "Refusing to apply automatic fixes, because git reports that there are pending changes\n" 1>&2
         print "(to override, use --force-fix instead)\n" 1>&2
@@ -111,17 +133,17 @@ fi
 DO_PLATFORM_BINARIES=false
 if [[ $* == *--platform-binaries* ]]
 then
-    echo "will make platform binaries"  #TODO @mark: TEMPORARY! REMOVE THIS!
     DO_PLATFORM_BINARIES=true
 else
-    printf "use --platform-binaries to produce platform-specific binaries\n"
+    printf "Use --platform-binaries to produce platform-specific binaries\n"
 fi
 
 # Create directory to store reports.
 REPORT_DIR="$CARGO_TARGET_DIR/report"
 mkdir -p -m 700 "$REPORT_DIR"
 
-if ! hash sccache 2>/dev/null
+# hash sccache 2>/dev/null
+if [[ "$RUSTC_WRAPPER" != "sccache" ]]
 then
     printf "Not using sccache (using sccache is recommended: https://github.com/mozilla/sccache)\n" 1>&2
 fi
