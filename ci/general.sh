@@ -63,12 +63,13 @@ function get_profile_executable() {
 function determine_clippy_fmt_nightly() {
     # Find a nightly version that has clippy and rustfmt, if there is one in the last week.
     #TODO @mark: needs more testing - right now there's no clippy-compatible version
-    python << EOF
-from requests import get
+    python3 << EOF
+from json import loads
+from urllib.request import urlopen
 from sys import stdout
 libs = tuple([
-    get(url="https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/clippy.json").json(),
-    get(url="https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/rustfmt.json").json() ])
+    loads(urlopen("https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/clippy.json").read()),
+    loads(urlopen("https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/rustfmt.json").read()) ])
 for date in sorted(libs[0].keys(), reverse=True):
     for lib in libs:
         if lib[date] is not True:
