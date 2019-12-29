@@ -12,6 +12,7 @@ set -u  # undefined variables are errors
 
 
 # Start C-style header guard (because who doesn't miss those?!).
+# Note these don't work on CI servers sometimes, so content must be idempotent!
 if [[ -z "${IS_GENERAL_HEADER_INCLUDED:-}" ]]
 then
 

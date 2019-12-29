@@ -46,3 +46,5 @@ then
         showrun cp "$executable" "$binaries_dir/$(basename $executable)-$platform"
     done
 fi
+
+printf "✓ building releases ready\n"

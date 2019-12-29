@@ -70,3 +70,5 @@ showrun cargo $CARGO_FLAGS deny check bans || true
 
 # Write information about dependencies.
 cargo $CARGO_FLAGS tree > "$REPORT_DIR/dependencies.txt"
+
+printf "✓ checking dependencies ready\n"

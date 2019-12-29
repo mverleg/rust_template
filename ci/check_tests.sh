@@ -79,3 +79,5 @@ source "${BASH_SOURCE%/*}/general.sh"
 
 # End of system support check
 #fi
+
+printf "✓ checking tests ready\n"

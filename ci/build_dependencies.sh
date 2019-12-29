@@ -11,4 +11,4 @@ source "${BASH_SOURCE%/*}/general.sh"
 showrun cargo $CARGO_FLAGS build --workspace
 clean_own_code_targets
 
-
+printf "✓ building dependencies ready\n"

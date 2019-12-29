@@ -21,3 +21,5 @@ fi
 
 # Check code patterns.
 showrun cargo $CARGO_FLAGS clippy --workspace --all-targets --all-features --tests -- -D warnings
+
+printf "✓ checking lints ready\n"
