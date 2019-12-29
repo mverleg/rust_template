@@ -1,6 +1,9 @@
 
-# These checks should all pass for the code to be considered worth executing in e.g. manual tests.
-name: Works - the code builds and tests pass
+##
+## These checks should all pass for the code to be considered worth executing in e.g. manual tests.
+## The code should build successfully in debug mode and the tests should pass.
+##
+name: Works
 on:
   push:
   pull_request:  #TODO @mark: is this already captured in 'push'?

@@ -1,5 +1,9 @@
 
-name: Dependencies - dependencies are up to date and do not conflcit
+##
+## Dependencies are up to date and do not conflict.
+## Dependencies need to be checked regularly, they can also go out of date if there are no commits.
+##
+name: Dependencies -
 on:
   schedule:
     - cron: '0 17 * * 6'
@@ -15,6 +19,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          ref: master
+          fetch-depth: 2
       - name: Check dependencies
         run: |
           ci/check_dependencies.sh

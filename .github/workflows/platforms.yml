@@ -1,6 +1,9 @@
 
-# This is intended to be an addition to 'polished.yml' and 'works.yml', which should always run when these jobs run.
-name: Platform support - see if tests pass on multiple operating systems and Rust versions.
+##
+## Check that the tests run on a number of operating systems and Rust versions.
+## This is intended to be an addition to 'polished.yml' and 'works.yml', which should always run when these jobs run.
+##
+name: Platforms
 on:
   pull_request:
   release:
