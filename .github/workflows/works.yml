@@ -14,12 +14,21 @@ jobs:
     # needs: works
     runs-on: ubuntu-latest
     steps:
-    - name: build dependencies
+    #TODO @mark: permissions unneeded?
+    - name: (permissions)
       run: |
-        ci/build_dependencies.sh
-    - name: build_debug
+        ls -als .
+        chmod u+x ci/*
+#    - name: Checkout
+#      uses: actions/checkout
+    - name: Build dependencies
       run: |
-        ci/build debug
-    - name: check tests
+        sh ./ci/build_dependencies.sh
+    - name: Build in debug mode
       run: |
-        ci/check_tests.sh
+        sh ./ci/build debug
+    - name: Check tests
+      run: |
+        sh ./ci/check_tests.sh
+
+#TODO @mark: test stable and nightly, using 'matrix'
