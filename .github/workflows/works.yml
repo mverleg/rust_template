@@ -21,7 +21,7 @@ jobs:
         ci/build_dependencies.sh
     - name: Build in debug mode
       run: |
-        ci/build debug
+        ci/build_debug.sh
     - name: Check tests
       run: |
         ci/check_tests.sh

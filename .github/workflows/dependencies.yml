@@ -3,9 +3,18 @@ name: Dependencies - dependencies are up to date and do not conflcit
 on:
   schedule:
     - cron: '0 17 * * 6'
+  pull_request:
+  release:
+    types:
+      - created
 
 jobs:
-  check_dependencies:
-    name: check_dependencies
+  polished:
+    name: Works
+    runs-on: ubuntu-latest
     steps:
-      script: "ci/check_dependencies.sh"
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Check dependencies
+        run: |
+          ci/check_dependencies.sh

@@ -9,19 +9,21 @@ on:
       - created
 
 jobs:
-  check_style:
-    name: check_style
+  polished:
+    name: Works
+    runs-on: ubuntu-latest
     steps:
-      script: "ci/check_style.sh"
-  check_lint:
-    name: check_lint
-    steps:
-      script: "ci/check_lint.sh"
-  check_performance:
-    name: check_performance
-    steps:
-      script: "ci/check_performance.sh"
-  build_docs:
-    name: build_docs
-    steps:
-      script: "ci/build_docs.sh"
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Check code style
+        run: |
+          ci/check_style.sh
+      - name: Lint
+        run: |
+          ci/check_style.sh
+      - name: Check performance
+        run: |
+          ci/check_performance.sh
+      - name: Build documentation
+        run: |
+          ci/build_docs.sh
