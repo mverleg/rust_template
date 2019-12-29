@@ -1,0 +1,11 @@
+
+name: Dependencies - dependencies are up to date and do not conflcit
+on:
+  schedule:
+    - cron: '0 17 * * 6'
+
+jobs:
+  check_dependencies:
+    name: check_dependencies
+    steps:
+      script: "ci/check_dependencies.sh"

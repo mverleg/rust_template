@@ -1,0 +1,25 @@
+
+# These checks should all pass for the code to be considered worth executing in e.g. manual tests.
+name: Works - the code builds and tests pass
+on:
+  push:
+  pull_request:  #TODO @mark: is this already captured in 'push'?
+  release:
+    types:
+      - created
+
+jobs:
+  works:
+    name: Works
+    # needs: works
+    runs-on: ubuntu-latest
+    steps:
+    - name: build dependencies
+      run: |
+        ci/build_dependencies.sh
+    - name: build_debug
+      run: |
+        ci/build debug
+    - name: check tests
+      run: |
+        ci/check_tests.sh
