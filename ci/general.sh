@@ -156,7 +156,7 @@ then
 fi
 
 # Install 'gfortran' if not installed.
-if ! hash rustup 2>/dev/null
+if ! hash gfortran 2>/dev/null
 then
     #TODO @mark: should be platform dependent
     showrun apt-get install -y libgfortran3 gfortran || true
