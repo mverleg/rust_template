@@ -56,18 +56,24 @@ source "${BASH_SOURCE%/*}/general.sh"
     #    showrun cargo $CARGO_FLAGS test --profile test_coverage --workspace
     #showrun cargo tarpaulin --all-features --ignore-tests --line
 
+    # KCOV ISSUE I CANNOT SOLVE:
+    # kcov: Process exited with signal 4 (SIGILL) at 0x7ffff625b013
+
+    if [[ 1 -gt 2 ]];then #TODO @mark: TEMPORARY! REMOVE THIS!
     #TODO @mark: is RUSTFLAGS needed in this case?
     RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads" \
         showrun cargo $CARGO_FLAGS test --profile test_coverage --workspace --no-run
 
-    test_executable="$(find "$CARGO_TARGET_DIR/test_coverage/" -type f -executable -print0 | xargs -r -0 ls -1 -t | tail -n +1 | head -1)"
-    build_hash="$(echo "$test_executable" | sed -E 's/.*-([^-]+)/\1/')"
-    echo "build_hash = $build_hash"  #TODO @mark: TEMPORARY! REMOVE THIS!
-    #TODO @mark: use '--report-time=plain' below when it's stabilized
+    test_executable="$(find "$CARGO_TARGET_DIR/test_coverage/" -type f -executable -print0 | (xargs -r -0 ls -1 -t || test $? -eq 141) | head -1)"
+    #build_hash="$(echo "$test_executable" | sed -E 's/.*-([^-]+)/\1/')"
     library_path="$(find target/test_coverage/ -type d -name lib -printf '%p:')"
-    printf "extra library path: %s\n" "$library_path"
+    printf "extra library path (watch for duplicates!): %s\n" "$library_path"
     export LD_LIBRARY_PATH="${library_path}${LD_LIBRARY_PATH}"
     showrun kcov --exclude-pattern=/.cargo target/kcov "$test_executable" --test
+    fi #TODO @mark: TEMPORARY! REMOVE THIS!
+
+    #TODO @mark: use '--report-time=plain' below when it's stabilized
+    showrun cargo $CARGO_FLAGS test --jobs 8 --profile test_coverage --workspace --tests --no-fail-fast
 
     #TODO @mark: RUSTFLAGS should be reset at this point
 
