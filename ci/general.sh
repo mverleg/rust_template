@@ -144,7 +144,7 @@ REPORT_DIR="$CARGO_TARGET_DIR/report"
 mkdir -p -m 700 "$REPORT_DIR"
 
 # hash sccache 2>/dev/null
-if [[ "$RUSTC_WRAPPER" != "sccache" ]]
+if [[ -z "${RUSTC_WRAPPER:-}" ]] || [[ "$RUSTC_WRAPPER" != "sccache" ]]
 then
     printf "Not using sccache (using sccache is recommended: https://github.com/mozilla/sccache)\n" 1>&2
 fi
