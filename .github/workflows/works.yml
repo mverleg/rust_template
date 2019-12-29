@@ -14,13 +14,8 @@ jobs:
     # needs: works
     runs-on: ubuntu-latest
     steps:
-    #TODO @mark: permissions unneeded?
-    - name: (permissions)
-      run: |
-        ls -als .
-        chmod u+x ci/*
-#    - name: Checkout
-#      uses: actions/checkout
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Build dependencies
       run: |
         sh ./ci/build_dependencies.sh
