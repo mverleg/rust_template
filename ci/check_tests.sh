@@ -64,7 +64,7 @@ source "${BASH_SOURCE%/*}/general.sh"
     RUSTFLAGS="-Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code -Coverflow-checks=off -Zno-landing-pads" \
         showrun cargo $CARGO_FLAGS test --profile test_coverage --workspace --no-run
 
-    test_executable="$(find "$CARGO_TARGET_DIR/test_coverage/" -type f -executable -print0 | (xargs -r -0 ls -1 -t || test $? -eq 141) | head -1)"
+    test_executable="$(get_profile_executable test_coverage)"
     #build_hash="$(echo "$test_executable" | sed -E 's/.*-([^-]+)/\1/')"
     library_path="$(find target/test_coverage/ -type d -name lib -printf '%p:')"
     printf "extra library path (watch for duplicates!): %s\n" "$library_path"

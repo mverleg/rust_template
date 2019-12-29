@@ -18,25 +18,6 @@ set -E  # technical change so traps work with -E
 set -o pipefail  # also include intermediate commands in -e
 set -u  # undefined variables are errors
 
-function showrun() {
-    echo ">> $@"
-    "$@"
-    exit_status="$?"
-    if [[ "$exit_status" -ne "0" ]]
-    then
-        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***\n" "'$*'" 1>&2
-        exit $exit_status
-    fi
-}
-
-function clean_own_code_targets() {
-    find . -maxdepth 5 -type f -name 'Cargo.toml' |
-        xargs grep '^\s*name\s*=\s*"' |
-        sed -E 's/\s*name\s*=\s*"([^"]*)"\s*/\1/' |
-        sort | uniq |
-        xargs -I"{}" bash -c 'printf "cargo clean -p {}\n"; cargo clean -p {}'
-}
-
 export CARGO_FLAGS="-Z unstable-options -Z config-profile"
 
 if [[ ! -f "Cargo.toml" ]]
@@ -58,6 +39,41 @@ then
     export LD_LIBRARY_PATH=""
 fi
 
+function showrun() {
+    echo ">> $@"
+    "$@"
+    exit_status="$?"
+    if [[ "$exit_status" -ne "0" ]]
+    then
+        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***\n" "'$*'" 1>&2
+        exit $exit_status
+    fi
+}
+
+function clean_own_code_targets() {
+    find . -maxdepth 5 -type f -name 'Cargo.toml' |
+        xargs grep '^\s*name\s*=\s*"' |
+        sed -E 's/\s*name\s*=\s*"([^"]*)"\s*/\1/' |
+        sort | uniq |
+        xargs -I"{}" bash -c 'printf "cargo clean -p {}\n"; cargo clean -p {}'
+}
+
+function get_profile_executable() {
+    # Note: assumes the most recent executable is correct (so no concurrent builds)
+    if [[ "$#" -ne 1 ]]
+    then
+        printf "Provide profile name to get executable path\n" 1>&2
+        exit 1
+    fi
+    profile_dir="$CARGO_TARGET_DIR/$1"
+    if [[ ! -d "$profile_dir" ]]
+    then
+        printf "Profile $1 has no output directory\n" 1>&2
+        exit 1
+    fi
+    printf "%s" "$(find "$profile_dir" -maxdepth 1 -type f -executable -print0 | (xargs -r -0 ls -1 -t || test $? -eq 141) | head -1)"
+}
+
 # Check if automatic fixes should be applied.
 DO_FIX=false
 if [[ $* == *--fix* ]]
@@ -73,6 +89,16 @@ then
 elif [[ $* == *--force-fix* ]]
 then
     DO_FIX=true
+fi
+
+# Check if platform binaries should be made.
+DO_PLATFORM_BINARIES=false
+if [[ $* == *--platform-binaries* ]]
+then
+    echo "will make platform binaries"  #TODO @mark: TEMPORARY! REMOVE THIS!
+    DO_PLATFORM_BINARIES=true
+else
+    printf "use --platform-binaries to produce platform-specific binaries\n"
 fi
 
 # Create directory to store reports.

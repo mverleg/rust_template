@@ -5,7 +5,8 @@
 
 rustflags = [
     # Optimize for current CPU.
-	"-C", "target-cpu=native",
+    #TODO @mark: disabled native arch until I can make it profile-specific
+	#"-C", "target-cpu=native",
 ]
 
 #[profile.dev]

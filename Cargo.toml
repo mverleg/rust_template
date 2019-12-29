@@ -40,8 +40,9 @@ debug = false
 
 [profile.release]
 opt-level = 3
-codegen-units = 1  # slower but more extensive version of (thin)lto
-lto = true
+#TODO @mark: enable lto:
+#codegen-units = 1  # slower but more extensive version of (thin)lto
+#lto = true
 
 [profile.test_coverage]
 inherits = "dev"
