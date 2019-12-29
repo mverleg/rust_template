@@ -30,11 +30,10 @@ function showrun() {
     "$@"
     exit_status="$?"
     set -e
-    echo "exit_status = $exit_status"  #TODO @mark: TEMPORARY! REMOVE THIS!
     if [[ "$exit_status" -ne "0" ]]
     then
-        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***\n" "'$*'" 1>&2
-        exit $exit_status
+        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s (status %d) ***\n" "'$*'" "$exit_status" 1>&2
+        return $exit_status
     fi
 }
 
@@ -102,19 +101,35 @@ then
     export LD_LIBRARY_PATH=""
 fi
 
-# Set up the correct git version
+# Set up the correct Rust version.
+export ORIGINAL_RUST_VERSION="$(rustup show active-toolchain | cut -d ' ' -f1)"
+function _revert_rust() {
+    if [[ -z "${ORIGINAL_RUST_VERSION:-}" ]] || [[ "$ORIGINAL_RUST_VERSION" != "$(rustup show active-toolchain | cut -d ' ' -f1)" ]]
+    then
+        printf "reverting to rust version '%s'\n" "$ORIGINAL_RUST_VERSION"
+        rustup default $ORIGINAL_RUST_VERSION
+    fi
+}
+# On exit, revert the Rust toolchain if needed.
+trap _revert_rust EXIT
 if [[ -z "${RUST_VERSION:-}" ]]
 then
     export RUST_VERSION="$(determine_clippy_fmt_nightly)"
     printf "No specific Rust version requested, falling back to %s\n" "$RUST_VERSION"
+    showrun rustup default "$RUST_VERSION"
+elif [[ "$RUST_VERSION" == "as-is" ]]
+then
+    export RUST_VERSION="$ORIGINAL_RUST_VERSION"
+    printf "Rust version should be kept as-is (%s)\n" "$RUST_VERSION"
 elif [[ "$RUST_VERSION" == "nightly" ]]
 then
     export RUST_VERSION="$(determine_clippy_fmt_nightly)"
     printf "Requested nightly, chose %s in an attempt to support rustfmt and clippy\n" "$RUST_VERSION"
+    showrun rustup default "$RUST_VERSION"
 else
     printf "Specific Rust version requested: %s\n" "$RUST_VERSION"
+    showrun rustup default "$RUST_VERSION"
 fi
-showrun rustup default "$RUST_VERSION"
 
 # Check if automatic fixes should be applied.
 DO_FIX=false
