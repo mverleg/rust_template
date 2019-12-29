@@ -156,6 +156,7 @@ then
 fi
 
 # Install 'gfortran' if not installed.
+type gfortran  #TODO @mark: TEMPORARY! REMOVE THIS!
 if ! hash gfortran 2>/dev/null
 then
     #TODO @mark: should be platform dependent
