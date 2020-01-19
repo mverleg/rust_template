@@ -22,9 +22,9 @@ mod async_mio {
 #[cfg(test)]
 mod rand_demo {
     use rand::prelude::StdRng;
-    use rand::thread_rng;
     use rand::Rng;
     use rand::SeedableRng;
+    use rand::thread_rng;
 
     // https://rust-random.github.io/book/overview.html
     #[test]
@@ -92,9 +92,9 @@ mod regex_demo {
 
 #[cfg(test)]
 mod chrono_demo {
+    use chrono::{NaiveDate, Utc};
     use chrono::Datelike;
     use chrono::TimeZone;
-    use chrono::{NaiveDate, Utc};
     use chrono_tz::Europe::Amsterdam;
 
     #[test]
@@ -218,8 +218,8 @@ mod itertools_demo {
 mod generic_array_demo {
     use std::mem::size_of;
 
-    use generic_array::typenum::U5;
     use generic_array::{arr, GenericArray};
+    use generic_array::typenum::U5;
 
     #[test]
     fn macro_create() {
@@ -263,7 +263,7 @@ mod array_tool_demo {
 mod array_compression_demo {
     use std::io::{Read, Write};
 
-    use ::brotli::{enc, CompressorWriter, Decompressor};
+    use ::brotli::{CompressorWriter, Decompressor, enc};
     use ::lipsum::lipsum;
     use ::mockstream::SharedMockStream;
 
@@ -421,11 +421,11 @@ mod ndarray {
 #[cfg(test)]
 mod num {
     use ::approx::assert_abs_diff_eq;
-    use ::num::rational::Ratio;
     use ::num::BigInt;
     use ::num::BigRational;
     use ::num::Complex;
     use ::num::FromPrimitive;
+    use ::num::rational::Ratio;
 
     #[test]
     #[allow(clippy::neg_multiply)]
@@ -500,5 +500,22 @@ mod complex_ndarray {
                 + Complex::new(3.0, 5.0) * Complex::new(13.0, -17.0),
             c[[0, 1]]
         );
+    }
+}
+
+#[cfg(test)]
+mod data_encodung {
+    use ::std::convert::TryInto;
+
+    use ::data_encoding::BASE64URL_NOPAD;
+
+    #[test]
+    fn base64() {
+        let original: u64 = 123_456_789_000;
+        let txt = BASE64URL_NOPAD.encode(&original.to_le_bytes());
+        assert_eq!("CBqZvhwAAAA", txt);
+        let back_u8: &[u8] = &BASE64URL_NOPAD.decode(txt.as_bytes()).unwrap();
+        let back = u64::from_le_bytes(back_u8.try_into().unwrap());
+        assert_eq!(original, back);
     }
 }
