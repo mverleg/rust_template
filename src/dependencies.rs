@@ -504,7 +504,7 @@ mod complex_ndarray {
 }
 
 #[cfg(test)]
-mod data_encodung {
+mod data_base_encoding {
     use ::std::convert::TryInto;
 
     use ::data_encoding::BASE64URL_NOPAD;
@@ -517,5 +517,30 @@ mod data_encodung {
         let back_u8: &[u8] = &BASE64URL_NOPAD.decode(txt.as_bytes()).unwrap();
         let back = u64::from_le_bytes(back_u8.try_into().unwrap());
         assert_eq!(original, back);
+    }
+}
+
+#[cfg(test)]
+mod derive_more_traits {
+    use ::derive_more::{Constructor, Add, Sub, Display, From, Into};
+
+    #[derive(Constructor, PartialEq, From, Into, Add, Sub, Debug, Display)]
+    #[display(fmt = "({}, {})", x, y)]
+    struct Point2D {
+        x: i32,
+        y: i32,
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", Point2D::new(-4, 3)), "(-4, 3)");
+    }
+
+    #[test]
+    fn math() {
+        let x: Point2D = (3, 5).into();
+        let y: Point2D = (7, 2).into();
+        let z = x - y;
+        assert_eq!(Point2D::new(-4, 3), z);
     }
 }
