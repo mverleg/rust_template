@@ -10,3 +10,4 @@ source "${BASH_SOURCE%/*}/general.sh"
 #TODO @mark: https://github.com/llogiq/flame
 #TODO @mark: generate flamegraph report: https://github.com/llogiq/flame or https://github.com/llogiq/flamer
 
+printf "✓ checking performance ready\n"

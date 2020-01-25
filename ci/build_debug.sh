@@ -10,3 +10,5 @@ source "${BASH_SOURCE%/*}/general.sh"
 #TODO @mark: can this fail on warnings?
 clean_own_code_targets
 showrun cargo $CARGO_FLAGS build --workspace
+
+printf "✓ building in debug mode ready\n"

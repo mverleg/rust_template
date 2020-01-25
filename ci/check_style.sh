@@ -21,3 +21,5 @@ fi
 # Check code style.
 clean_own_code_targets
 showrun cargo $CARGO_FLAGS fmt -- --check
+
+printf "✓ checking style ready\n"

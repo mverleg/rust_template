@@ -1,7 +1,10 @@
 
-# This is intended to be an addition to 'works.yaml', which should always run when these jobs run.
-# These checks (along with 'works.yaml') should all pass before merging to a shared branch (including master) or reviewing.
-name: Polished - style guidelines followed, no suspicious patterns, dependencies up to date, documented.
+##
+## Style guidelines followed, no suspicious patterns, dependencies up to date, documented.
+## This is intended to be an addition to 'works.yml', which should always run when these jobs run.
+## These checks (along with 'works.yml') should all pass before merging to a shared branch (including master) or reviewing.
+##
+name: Polished
 on:
   pull_request:
   release:
@@ -10,7 +13,7 @@ on:
 
 jobs:
   polished:
-    name: Works
+    name: Polished
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -1,0 +1,28 @@
+
+##
+## Check that the tests run on a number of operating systems and Rust versions.
+## This is intended to be an addition to 'polished.yml' and 'works.yml', which should always run when these jobs run.
+##
+name: Platforms
+on:
+  pull_request:
+  release:
+    types:
+      - created
+
+jobs:
+  platform_support:
+    name: Platform ${{ matrix.os }} ${{ matrix.rust }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]  # macos-latest, windows-latest
+        rust: [nightly]  # add stable if supported
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Check tests
+        env:
+          RUST_VERSION: ${{ matrix.rust }}
+        run: |
+          ci/check_tests.sh

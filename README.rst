@@ -1,14 +1,18 @@
-.. image:: https://travis-ci.org/mverleg/rust_template.svg?branch=master
-    :target: https://travis-ci.org/mverleg/rust_template
 
-.. image:: https://deps.rs/repo/github/mverleg/rust_template/status.svg
-    :target: https://deps.rs/repo/github/mverleg/rust_template
+.. image:: https://github.com/mverleg/rust_template/workflows/Works/badge.svg
+    :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/works.yml
+
+.. image:: https://github.com/mverleg/rust_template/workflows/Polished/badge.svg
+    :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/polished.yml
+
+.. image:: https://github.com/mverleg/rust_template/workflows/Platforms/badge.svg
+    :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/platforms.yml
+
+.. image:: https://github.com/mverleg/rust_template/workflows/Dependencies/badge.svg
+    :target: https://github.com/mverleg/rust_template/blob/master/.github/workflows/dependencies.yml
 
 .. image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
     :target: https://opensource.org/licenses/BSD-3-Clause
-
-
-
 
 Rust template project
 ===============================
@@ -36,11 +40,18 @@ Checklist
 Troubleshooting
 -------------------------------
 
-* If you get an error like this while compiling::
+* Blas error::
 
       undefined reference to `cblas_sgemm'
 
-  then you may need to integrate_ ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
+  You may need to integrate_ ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
+
+* gfortran error::
+
+      = note: /usr/bin/ld: cannot find -lgfortran
+          collect2: error: ld returned 1 exit status
+
+  You may need to install ``gfortran``, or disable ``ndarray``-related dependencies (if you do not need them).
 
 
 .. _integrate: https://github.com/blas-lapack-rs/blas-lapack-rs.github.io/wiki

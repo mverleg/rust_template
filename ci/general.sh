@@ -4,18 +4,23 @@
 ## General setup that should be imported by each step.
 ##
 
+
+# Start C-style header guard (because who doesn't miss those?!).
+# Note these don't work on CI servers sometimes, so content must be idempotent!
+if [[ -z "${IS_GENERAL_HEADER_INCLUDED:-}" ]]
+then
+
+export CARGO_FLAGS="-Z unstable-options -Z config-profile"
+
+##
+## PRE-CONDITIONS AND UTILITIES
+##
+
 # Note that these sets are inside the bash invoked above, so only for this script.
 set -e  # fail if a command fails
 set -E  # technical change so traps work with -E
 set -o pipefail  # also include intermediate commands in -e
 set -u  # undefined variables are errors
-
-
-# Start C-style header guard (because who doesn't miss those?!).
-if [[ -z "${IS_GENERAL_HEADER_INCLUDED:-}" ]]
-then
-
-export CARGO_FLAGS="-Z unstable-options -Z config-profile"
 
 if [[ ! -f "Cargo.toml" ]]
 then
@@ -23,29 +28,16 @@ then
     exit 1
 fi
 
-# Set target dir, if not set, so commands can use it.
-if [[ -z "${CARGO_TARGET_DIR:-}" ]]
-then
-    export CARGO_TARGET_DIR="$(pwd)/target"
-    mkdir -p -m 700 "$CARGO_TARGET_DIR"
-fi
-
-# Make sure library path exists, so -u doesn't crash it
-if [[ -z "${LD_LIBRARY_PATH:-}" ]]
-then
-    export LD_LIBRARY_PATH=""
-fi
-
 function showrun() {
     echo ">> $@"
     set +e
     "$@"
-    set -e
     exit_status="$?"
+    set -e
     if [[ "$exit_status" -ne "0" ]]
     then
-        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s ***\n" "'$*'" 1>&2
-        exit $exit_status
+        printf "*** A PROBLEM OCCURRED WHEN RUNNING: %s (status %d) ***\n" "'$*'" "$exit_status" 1>&2
+        return $exit_status
     fi
 }
 
@@ -73,19 +65,56 @@ function get_profile_executable() {
     printf "%s" "$(find "$profile_dir" -maxdepth 1 -type f -executable -print0 | (xargs -r -0 ls -1 -t || test $? -eq 141) | head -1)"
 }
 
+function determine_clippy_fmt_nightly() {
+    # Find a nightly version that has clippy and rustfmt, if there is one in the last week.
+    #TODO @mark: needs more testing - right now there's no clippy-compatible version
+    python3 << EOF
+from json import loads
+from urllib.request import urlopen
+from sys import stdout
+libs = tuple([
+    loads(urlopen("https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/clippy.json").read()),
+    loads(urlopen("https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/rustfmt.json").read()) ])
+for date in sorted(libs[0].keys(), reverse=True):
+    for lib in libs:
+        if lib[date] is not True:
+            break
+    else:
+        # date for all libs valid
+        stdout.write(date)
+        break
+# no supported version; choose general nightly, which'll probably fail...
+stdout.write("nightly")
+EOF
+}
+
+##
+## ENVIRONMENT AND ARGUMENTS
+##
+
 # If your version of Rust does not support clippy or another component, check which version does at
 # https://rust-lang.github.io/rustup-components-history/index.html
 # then switch to it using `rustup default nightly-2019-12-20` (using the correct date).
 
-# Set up the correct git version
-showrun rustup default nightly-2019-12-20
+# Set target dir, if not set, so commands can use it.
+if [[ -z "${CARGO_TARGET_DIR:-}" ]]
+then
+    export CARGO_TARGET_DIR="$(pwd)/target"
+    mkdir -p -m 700 "$CARGO_TARGET_DIR"
+fi
+
+# Make sure library path exists, so -u doesn't crash it
+if [[ -z "${LD_LIBRARY_PATH:-}" ]]
+then
+    export LD_LIBRARY_PATH=""
+fi
 
 # Check if automatic fixes should be applied.
-DO_FIX=false
+export DO_FIX=false
 if [[ $* == *--fix* ]]
 then
-    DO_FIX=true
-        if [[ -n "$(git status --porcelain)" ]]
+    export DO_FIX=true
+    if [[ -n "$(git status --porcelain)" ]]
     then
         printf "Refusing to apply automatic fixes, because git reports that there are pending changes\n" 1>&2
         print "(to override, use --force-fix instead)\n" 1>&2
@@ -94,33 +123,81 @@ then
     fi
 elif [[ $* == *--force-fix* ]]
 then
-    DO_FIX=true
+    export DO_FIX=true
 fi
 
 # Check if platform binaries should be made.
-DO_PLATFORM_BINARIES=false
+export DO_PLATFORM_BINARIES=false
 if [[ $* == *--platform-binaries* ]]
 then
-    echo "will make platform binaries"  #TODO @mark: TEMPORARY! REMOVE THIS!
-    DO_PLATFORM_BINARIES=true
-else
-    printf "use --platform-binaries to produce platform-specific binaries\n"
+    export DO_PLATFORM_BINARIES=true
 fi
 
 # Create directory to store reports.
-REPORT_DIR="$CARGO_TARGET_DIR/report"
+export REPORT_DIR="$CARGO_TARGET_DIR/report"
 mkdir -p -m 700 "$REPORT_DIR"
 
-if ! hash sccache 2>/dev/null
+##
+## TOOLCHAIN SETUP
+##
+
+# hash sccache 2>/dev/null
+if [[ -z "${RUSTC_WRAPPER:-}" ]] || [[ "$RUSTC_WRAPPER" != "sccache" ]]
 then
     printf "Not using sccache (using sccache is recommended: https://github.com/mozilla/sccache)\n" 1>&2
 fi
 
-# Add components.
-if ! hash grcov 2>/dev/null
+# Install 'rustup' if not installed.
+if ! hash rustup 2>/dev/null
 then
-    showrun cargo $CARGO_FLAGS install grcov
+    printf "rustup was not installed!\n" 1>&2
+    showrun bash -c 'curl https://sh.rustup.rs -sSf | sh -s -- -y'
+    export PATH="$HOME/.cargo/bin:$PATH"
 fi
+
+# Install 'gfortran' if not installed.
+type gfortran  #TODO @mark: TEMPORARY! REMOVE THIS!
+if ! hash gfortran 2>/dev/null
+then
+    #TODO @mark: should be platform dependent
+    showrun apt-get install -y libgfortran3 gfortran || true
+fi
+
+# Set up the correct Rust version.
+export ORIGINAL_RUST_VERSION="$(rustup show active-toolchain | cut -d ' ' -f1)"
+function _revert_rust() {
+    if [[ -z "${ORIGINAL_RUST_VERSION:-}" ]] || [[ "$ORIGINAL_RUST_VERSION" != "$(rustup show active-toolchain | cut -d ' ' -f1)" ]]
+    then
+        printf "reverting to rust version '%s'\n" "$ORIGINAL_RUST_VERSION"
+        rustup default $ORIGINAL_RUST_VERSION
+    fi
+}
+# On exit, revert the Rust toolchain if needed.
+trap _revert_rust EXIT
+if [[ -z "${RUST_VERSION:-}" ]]
+then
+    export RUST_VERSION="$(determine_clippy_fmt_nightly)"
+    printf "No specific Rust version requested, falling back to %s\n" "$RUST_VERSION"
+    showrun rustup default "$RUST_VERSION"
+elif [[ "$RUST_VERSION" == "as-is" ]]
+then
+    export RUST_VERSION="$ORIGINAL_RUST_VERSION"
+    printf "Rust version should be kept as-is (%s)\n" "$RUST_VERSION"
+elif [[ "$RUST_VERSION" == "nightly" ]]
+then
+    export RUST_VERSION="$(determine_clippy_fmt_nightly)"
+    printf "Requested nightly, chose %s in an attempt to support rustfmt and clippy\n" "$RUST_VERSION"
+    showrun rustup default "$RUST_VERSION"
+else
+    printf "Specific Rust version requested: %s\n" "$RUST_VERSION"
+    showrun rustup default "$RUST_VERSION"
+fi
+
+# Add components.
+#if ! hash grcov 2>/dev/null
+#then
+#    showrun cargo $CARGO_FLAGS install grcov
+#fi
 
 # End of the C-style header guard.
 IS_GENERAL_HEADER_INCLUDED=1
