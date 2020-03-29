@@ -52,6 +52,8 @@ debug = false
 [profile.test_coverage.package."*"]
 opt-level = 3
 
+#TODO @mark: bench
+
 #TODO for web, use opt-level 'z'
 
 [dependencies]
@@ -88,8 +90,8 @@ ndarray-rand = "^0.11.0"
 ndarray-linalg = { version = "^0.12.0", features = ["openblas"] }
 # Next three: version must work with ndarray; only include this for binaries (not libraries)
 blas = "*"
-blas-src = { version = "*", features = ["openblas"] }
-openblas-src = "*"
+#blas-src = { version = "*", features = ["openblas"] }
+#openblas-src = "*"
 #TODO @mark: num https://rust-lang-nursery.github.io/rust-cookbook/science/mathematics/complex_numbers.html
 
 # Application

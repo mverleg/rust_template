@@ -20,7 +20,7 @@ jobs:
           ci/check_style.sh
       - name: Lint
         run: |
-          ci/check_style.sh
+          ci/check_lint.sh
       - name: Check performance
         run: |
           ci/check_performance.sh

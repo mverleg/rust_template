@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="format" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
+  <configuration default="false" name="bench" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
     <option name="channel" value="DEFAULT" />
-    <option name="command" value="fmt --all -Z unstable-options -Z config-profile" />
+    <option name="command" value="bench -Z unstable-options -Z config-profile" />
     <option name="allFeatures" value="true" />
     <option name="nocapture" value="false" />
     <option name="emulateTerminal" value="false" />
