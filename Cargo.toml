@@ -9,10 +9,10 @@ edition = "2018"
 
 #TODO @mark: switch to metabuild: https://doc.rust-lang.org/cargo/reference/unstable.html#metabuild
 build = "build/build.rs"
-include = ["src/**/*", "Cargo.toml", "LICENSE.txt", "README.rst"]
+include = ["src/**/*", "Cargo.toml", "LICENSE.txt", "README.md"]
 
 publish = false
-readme = "README.rst"
+readme = "README.md"
 license = "BSD-3-Clause"
 keywords = []
 

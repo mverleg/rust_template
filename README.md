@@ -1,14 +1,7 @@
-.. image:: https://travis-ci.org/mverleg/rust_template.svg?branch=master
-    :target: https://travis-ci.org/mverleg/rust_template
 
-.. image:: https://deps.rs/repo/github/mverleg/rust_template/status.svg
-    :target: https://deps.rs/repo/github/mverleg/rust_template
-
-.. image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg
-    :target: https://opensource.org/licenses/BSD-3-Clause
-
-
-
+[<img src="https://travis-ci.org/mverleg/rust_template.svg?branch=master">](https://travis-ci.org/mverleg/rust_template)
+[<img src="https://deps.rs/repo/github/mverleg/rust_template/status.svg">](https://deps.rs/repo/github/mverleg/rust_template)
+[<img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg">](https://opensource.org/licenses/BSD-3-Clause)
 
 Rust template project
 ===============================
@@ -31,7 +24,7 @@ Checklist
 * Replace this readme.
 * Enable Travis CI for the repo.
 * Update the badges at the top of this file and in Cargo.toml.
-* Add date in ``RELEASES.rst``
+* Add date in ``RELEASES.md``
 
 Troubleshooting
 -------------------------------
@@ -40,7 +33,4 @@ Troubleshooting
 
       undefined reference to `cblas_sgemm'
 
-  then you may need to integrate_ ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
-
-
-.. _integrate: https://github.com/blas-lapack-rs/blas-lapack-rs.github.io/wiki
+  then you may need to [integrate](https://github.com/blas-lapack-rs/blas-lapack-rs.github.io/wiki) ``openblas``, or disable ``ndarray``-related dependencies (if you do not need them).
