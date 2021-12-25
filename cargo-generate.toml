@@ -1,0 +1,4 @@
+# If you cloned the project instead of using cargo-generate, you can delete this file.
+
+[template]
+ignore = ["README.md"]
