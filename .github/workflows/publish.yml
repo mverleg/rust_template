@@ -1,8 +1,0 @@
-
-# These steps create a release, including for example binaries, images, reports, ...
-# For this to be run, 'works.yaml' and 'polished.yaml' should have run, and reviews & manual tests should have completed.
-name: Release - for code (presumably in 'master'), create a release.
-on: [push]
-
-jobs:
-#TODO
