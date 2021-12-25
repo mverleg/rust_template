@@ -5,7 +5,7 @@ use ::env_logger;
 use ::structopt::StructOpt;
 use ::tokio;
 
-use ::todotodo::run;
+use ::{{crate_name}}lib::run;
 
 #[cfg(feature = "jemalloc")]
 #[global_allocator]

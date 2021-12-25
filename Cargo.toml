@@ -7,11 +7,11 @@ publish = false
 license = "Apache-2.0"
 
 [[bin]]
-name = "todo"
+name = "{{crate_name}}"
 path = "src/main.rs"
 
 [lib]
-name = "todotodo"
+name = "{{crate_name}}lib"
 path = "src/lib.rs"
 
 [features]
