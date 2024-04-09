@@ -8,6 +8,6 @@ set -eEu
 cache_dir="$(dirname $(mktemp))/$USER/{{crate_name}}"
 mkdir -m700 -p "$cache_dir"
 docker run --rm \
-    -v"$(pwd)":/volume -v"$cache_dir":/root/.cargo/ \
-    -it "mverleg/rust_nightly_musl_base:nodeps_2021-12-15_22" cargo "$@"
-
+    -v"$(pwd)":/volume \
+    -it "mverleg/rust_nightly_musl_base:deps_2021-12-25_4" cargo "$@"
+# -v"$cache_dir":/root/.cargo

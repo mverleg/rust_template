@@ -2,5 +2,5 @@
 
 ```
 cargo install cargo-generate
-cargo generate --git https://github.com/mverleg/rust_template.git --name $NAME
+cargo generate --init --git https://github.com/mverleg/rust_template.git --name $NAME
 ```
